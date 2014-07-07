@@ -389,7 +389,7 @@ AQH <- function(start.date, end.date, platforms=default.platforms, sample.size=5
   close(pb)
   
   aqh <- mean(colSums(user.qh))
-  qh.count <- data.frame("qh"=colnames(user.qh)."listeners"=colSums(user.qh))
+  qh.count <- data.frame("qh"=colnames(user.qh),"listeners"=colSums(user.qh))
   assign("qh.count",qh.count,envir= .GlobalEnv)
   return(aqh)
 }

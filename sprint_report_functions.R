@@ -238,6 +238,83 @@ GetUserDailyListening <- function(start.date, end.date, platforms=default.platfo
 # round(MeanNonZeroValues(udl <- GetUserDailyListening(start.date="2014-03-19", end.date="2014-04-18")), 1)
 # MeanNonZeroValues(GetUserDailyListening(start.date="2014-06-01", end.date="2014-06-16", platforms='ANDROID'))
 
+UserSessionDurations <- function(start.date, 
+                                 end.date, 
+                                 max.n.users, 
+                                 session.delta.seconds,
+                                 platforms=default.platforms, 
+                                 driver=m) {
+  
+  start.date <- as.Date(start.date)
+  end.date <- as.Date(end.date)
+  
+  #########################
+  ###  Get Usage Array  ###
+  #########################
+  # Require users to have have installed before period.start and have some activity during the period
+  cat("Generating list of users active during set period...\n")
+  user.ids <- intersect(GetValidUserIds(end.date=start.date - 1),
+                        GetValidUserIds(start.date=start.date, end.date=end.date))
+  
+  # Sample the users if necessary
+  if(length(user.ids) > max.n.users) {
+    cat("Sampling from ", length(user.ids), " users.\n")
+    user.ids <- sample(user.ids, max.n.users)
+  }
+  n.users <- length(user.ids)
+  
+  ######################################################
+  ###  Generate list (by user) of lists of sessions  ###
+  ######################################################
+  cat("Parsing users sessions...\n")
+  pb <- txtProgressBar(max=n.users, style=2)
+  user.sessions <- lapply(1:n.users, function(i) {
+    setTxtProgressBar(pb, i)
+    uid <- user.ids[i]
+    ur <- GetUserRatings(uid)                                    # get user ratings for this user
+    ur$date <- as.Date(ur$ratings_timestamp)
+    ur <- ur[ur$date >= start.date & ur$date <= end.date,]   # filter on period
+    ur <- ur[order(ur$ratings_timestamp),]                       # sort user ratings chronologically
+    break.after <- which(diff(ur$ratings_timestamp) > session.delta.seconds)  # find breaks between sessions
+    # identify which ratings (rows in ur) a grouped into sessions
+    if(length(break.after) > 0) {
+      # if there's more than one session
+      session.ids <- lapply(1:length(break.after), function(break.i) {
+        if(break.i == 1) return(1:break.after[1])
+        else return((break.after[break.i - 1]+1):break.after[break.i])
+      })
+      session.ids <- c(session.ids, list((break.after[length(break.after)]+1):nrow(ur)))
+    } else {
+      # only one session
+      session.ids <- list(1:nrow(ur))
+    }
+    return(lapply(session.ids, function(ids) {
+      out <- ur[ids,]
+      rownames(out) <- NULL
+      return(out)
+    }))
+  })
+  close(pb)
+  
+  mean.num.sessions <- mean(sapply(user.sessions, length))
+  
+  # Examine session durations
+  user.session.durations <- lapply(user.sessions, function(this.users.sessions) {
+    sapply(this.users.sessions, function(this.session) {
+      sum(this.session$ratings_elapsed)
+    })
+  })
+  
+  all.session.durations.sec <- unlist(user.session.durations)
+  all.session.durations.sec <- all.session.durations.sec[!(0 == all.session.durations.sec)]
+  
+  out <- list(mean.session.min=mean(all.session.durations.sec) / 60,
+              mean.num.sessions=mean.num.sessions,
+              all.session.min=all.session.durations.sec / 60)
+  return(out)
+}
+#us <- UserSessionDurations(start.date="2014-06-29", end.date="2014-07-12", max.n.users=1e4, session.delta.seconds=30 * 60, platforms=default.platforms, driver=m)
+
 ##########################################
 ###  Calculations on things Retrieved  ###
 ##########################################

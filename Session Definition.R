@@ -11,13 +11,13 @@ robo.ids <- c(11987982,
 
 ### Count Sessions ###
   # A function to mesh ratings data into a table of sessions, each with a unique session id, user id, duration, ratings completed, and start and end times
-CountSessions <- function(start.date, end.date, session_timeout=30, platforms=default.platforms, driver=m) {
+CountSessions <- function(start.date, end.date, session_timeout=30, platforms=default.platforms, driver=m, group="stage4") {
   # start.date <- '2014-07-12'
   # end.date <- '2014-07-14'
   
   #Fetch the ratings data from input parameters and sort by user id and timestamp  
-  con <- dbConnect(driver, group = "gracchus")
-  SQLstatement <- paste("SELECT * FROM user_ratings ", 
+  con <- dbConnect(driver, group = group)
+  SQLstatement <- paste("SELECT * FROM infinite.user_ratings ", 
                         "WHERE ratings_platform IN ('", paste(default.platforms, collapse="', '"), "') ",
                         "AND DATE(ratings_timestamp) >= '", start.date, "' ",
                         "AND DATE(ratings_timestamp) <= '", end.date, "' ",
@@ -58,19 +58,23 @@ CountSessions <- function(start.date, end.date, session_timeout=30, platforms=de
   pb <- txtProgressBar(max=nrow(castdf), style=2)
   for(i in 1:nrow(castdf)){
     setTxtProgressBar(pb, i)
-    castdf$total_ratings[i] <- sum(castdf[i,3:11])
+    castdf$total_ratings[i] <- sum(castdf[i,c("COMPLETED","DEFER","PASS","SHARE","SKIP","SRCHSTART","START","THUMBUP","TIMEOUT")])
     castdf$session_start[i] <- min(df$ratings_timestamp[df$session_id == i])
     castdf$session_end[i] <- max(df$ratings_timestamp[df$session_id == i])
     castdf$session_duration[i] <- as.numeric(difftime(castdf$session_end[i], castdf$session_start[i], units="min"))
   }
   close(pb)
   assign("Sessions",castdf,envir = .GlobalEnv)
-  print(paste("the number of sessions between", start.date, "and", end.date, "was",nrow(Sessions)))
+  print(paste("the number of sessions between", start.date, "and", end.date, "was",nrow(Sessions), "across", length(unique(castdf$ratings_user_id)),"unique users"))
   print(paste("total ratings for this period =",nrow(df)))
 }
 
 # CountSessions('2014-07-11','2014-07-14',session_timeout=30)
+
 ### END ###
+
+###########################################################################
+###########################################################################
 
 
 

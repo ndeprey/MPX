@@ -17,7 +17,7 @@ CountSessions <- function(start.date, end.date, session_timeout=30, platforms=de
   
   #Fetch the ratings data from input parameters and sort by user id and timestamp  
   con <- dbConnect(driver, group = group)
-  SQLstatement <- paste("SELECT * FROM infinite.user_ratings ", 
+  SQLstatement <- paste("SELECT ratings_user_id,ratings_rating,ratings_timestamp FROM infinite.user_ratings ", 
                         "WHERE ratings_platform IN ('", paste(default.platforms, collapse="', '"), "') ",
                         "AND DATE(ratings_timestamp) >= '", start.date, "' ",
                         "AND DATE(ratings_timestamp) <= '", end.date, "' ",
@@ -25,12 +25,14 @@ CountSessions <- function(start.date, end.date, session_timeout=30, platforms=de
                         "ORDER BY ratings_user_id ASC, TIMESTAMP(ratings_timestamp) ASC", sep='')
   rs <- dbSendQuery(con, SQLstatement)
   df <- fetch(rs, n=-1)
+  print("done with SQL query")
   
   #For every rating, calculate the difference in time (minutes) since the previous rating and add as a column to the dataframe
   for (i in 2:length(df$ratings_rating)) {
     df$ratings_diff[1] <- 0
     df$ratings_diff[i] <- as.numeric(difftime(df$ratings_timestamp[i], df$ratings_timestamp[i-1],units="min"))
   }
+  print("done with assigning ratings_diff")
   
   # Assign a session ID based on the user ID and a comparison of the ratings time differences vs the session timeout parameter.
   # Determine whether each rating is the start, middle, or end of the session and assign this value 
@@ -48,6 +50,7 @@ CountSessions <- function(start.date, end.date, session_timeout=30, platforms=de
       df$session_pos[i-1] <- "end"
     }
   }
+  print("done with assigning session id")
   
   # This function is similar to pivot tables in excel, 
   # in which we are grouping the data by session ID and saving as a new data frame

@@ -21,8 +21,8 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
                         ratings_cohort 
                         FROM infinite.user_ratings ", 
                         "WHERE ratings_platform IN ('", paste(default.platforms, collapse="', '"), "') ",
-                        "AND ratings_timestamp >= '", start.date, "' ",
-                        "AND ratings_timestamp <= '", end.date, "' ",
+                        "AND DATE(ratings_timestamp) >= '", start.date, "' ",
+                        "AND DATE(ratings_timestamp) <= '", end.date, "' ",
                         "ORDER BY ratings_user_id ASC, TIMESTAMP(ratings_timestamp) ASC", sep='')
   rs <- dbSendQuery(con, SQLstatement)
   df <- fetch(rs, n=-1)
@@ -55,7 +55,7 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
   print(paste("this query includes",
               length(unique(df$ratings_user_id)), 
               "unique users and", 
-              length(ratingsdf$ratings_origin[ratingsdf$story_num==1]),
+              length(df$ratings_origin[df$story_num==1]),
               "sessions"))
   
   ## Calculate the running sum of seconds elapsed within the session using the ratings_elapsed field

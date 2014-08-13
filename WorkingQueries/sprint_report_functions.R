@@ -31,7 +31,7 @@ GetValidUserIds <- function(start.date, end.date, platforms=default.platforms, d
   #' the list to those users active during that date range.
   #' 
   #' Limiting to a date range greatly speeds up the query.
-  con <- dbConnect(driver, group = "gracchus")
+  con <- dbConnect(driver, group = "stage4")
   SQLstatement <- paste("SELECT DISTINCT(ratings_user_id) FROM user_ratings ",
     "WHERE ratings_platform IN ('", 
     paste(platforms, collapse="', '"),
@@ -91,7 +91,7 @@ CountUsersWithActivity <- function(start.date, end.date, platforms=default.platf
 GetUserRatings <- function(user.id, driver=m) {
   #' Given a user_id returns all the ratings (all fields) for that user.
   #' This is used in some other functions to analyze a single user's activity.
-  con <- dbConnect(driver, group = "gracchus")
+  con <- dbConnect(driver, group = "stage4")
   rs <- dbSendQuery(con, paste("SELECT * FROM user_ratings where ratings_user_id = '",
                                user.id, "' AND ratings_elapsed < 24*60*60", sep=""))
   df <- fetch(rs, n=-1)
@@ -105,7 +105,7 @@ GetUserRatings <- function(user.id, driver=m) {
 
 GetAllUserRatings <- function(start.date, end.date, platforms=default.platforms, driver=m) {
   #' Given a date range return all records from ratings for valid users
-  con <- dbConnect(driver, group = "gracchus")
+  con <- dbConnect(driver, group = "stage4")
   SQLstatement <- paste("SELECT * FROM user_ratings ",
                         "WHERE ratings_platform IN ('", 
                         paste(platforms, collapse="', '"),
@@ -132,7 +132,7 @@ GetAllUserRatings <- function(start.date, end.date, platforms=default.platforms,
 GetUserActiveDates <- function(user.id, start.date, end.date, driver=m) {
   #' Given a user_id returns all the ratings (all fields) for that user.
   #' This is used in some other functions to analyze a single user's activity.
-  con <- dbConnect(driver, group = "gracchus")
+  con <- dbConnect(driver, group = "stage4")
   SQLstatement <- paste("SELECT DISTINCT(DATE(ratings_timestamp)) as dates ",
                         "FROM user_ratings ",
                         "WHERE ratings_user_id = '", user.id, "'", sep='')
@@ -172,7 +172,7 @@ GetOrgs <- function(driver=m) {
 #' orgs <- GetOrgs()
 
 GetTLH <- function(start.date, end.date, platforms=default.platforms, driver=m) {
-  con <- dbConnect(driver, group = "gracchus")
+  con <- dbConnect(driver, group = "stage4")
   SQLstatement <- paste("SELECT SUM(ratings_elapsed) FROM user_ratings ", 
     "WHERE ratings_platform IN ('", paste(platforms, collapse="', '"), "') ",
     "AND DATE(ratings_timestamp) >= '", start.date, "' ",
@@ -189,7 +189,7 @@ GetTlhByHourOfDay <- function(start.date, end.date, platforms=default.platforms,
   
   cat("All times are local (including Daylight Saving) for the east coast.\n")
   
-  con <- dbConnect(driver, group = "gracchus")
+  con <- dbConnect(driver, group = "stage4")
   SQLstatement <- paste("SELECT HOUR(ratings_timestamp) as hour_of_day, SUM(ratings_elapsed) / 3600 as TLH ",
                         "FROM user_ratings ",
                         "WHERE ratings_platform IN ('", paste(platforms, collapse="', '"), "') ",
@@ -217,7 +217,7 @@ GetUserDailyListening <- function(start.date, end.date, platforms=default.platfo
   #' 
   #' Note that this is not the same as time using the app because we are
   #' limiting these times to SKIP and COMPLETED ratings.
-  con <- dbConnect(driver, group = "gracchus")
+  con <- dbConnect(driver, group = "stage4")
   rs <- dbSendQuery(con, 
                     paste("SELECT SUM(ratings_elapsed) / 60 as daily_total_minutes FROM infinite.user_ratings ",
                           "WHERE DATE(ratings_timestamp) >= '", start.date, 
@@ -331,7 +331,7 @@ UserHadActivityDuring <- function(ur, start, end) {
 
 ActiveDaysPerWeek <- function(start.date, per.length.days, platforms=default.platforms, driver=m) {
   end.date <- format(ymd(start.date) + (per.length.days - 1) * 24 * 60 * 60, "%Y-%m-%d")
-  con <- dbConnect(driver, group = "gracchus")
+  con <- dbConnect(driver, group = "stage4")
   rs <- dbSendQuery(con, paste("SELECT COUNT(DISTINCT DATE(ratings_timestamp)) AS num_days_active FROM infinite.user_ratings ",
                                "WHERE DATE(ratings_timestamp) >= '", start.date, 
                                "' AND DATE(ratings_timestamp) <= '", end.date,
@@ -392,7 +392,7 @@ DaysSinceLastActiveDay <- function(start.date, end.date, n.sample, driver=m) {
 
 CountActions <- function(start.date, end.date, action, platforms=default.platforms, driver=m) {
   #' Given a date range and an action type, return the number of those events
-  con <- dbConnect(driver, group = "gracchus")
+  con <- dbConnect(driver, group = "stage4")
   rs <- dbSendQuery(con, paste("SELECT COUNT(ratings_rating) AS rating_count FROM user_ratings ",
                                "WHERE DATE(ratings_timestamp) >= '", start.date, 
                                "' AND DATE(ratings_timestamp) <= '", end.date,

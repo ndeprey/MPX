@@ -1,11 +1,12 @@
 
-m <- dbDriver("MySQL")
+
 # default.platforms <- c('IPHONE')
 default.platforms <- c('IPHONE', 'ANDROID')
 library(lubridate)
 library(RMySQL)
 library(plyr)
 library(reshape2)
+m <- dbDriver("MySQL")
 
 Session_Number <- function(start.date, end.date, session_timeout=30, platforms=default.platforms, driver=m, group="stage4") {
   # start.date <- '2014-07-12'

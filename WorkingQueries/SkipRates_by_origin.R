@@ -1,5 +1,5 @@
 
-m <- dbDriver("MySQL")
+
 # default.platforms <- c('IPHONE')
 default.platforms <- c('IPHONE', 'ANDROID')
 library(lubridate)
@@ -8,6 +8,7 @@ library(plyr)
 library(reshape2)
 library(ggplot2)
 
+m <- dbDriver("MySQL")
 ## IF YOU GET AN ERROR for too many connections open, use the following code
 ## cons <- dbListConnections(MySQL())
 ## for (con in cons){

@@ -4,9 +4,10 @@
 default.platforms <- c('IPHONE', 'ANDROID')
 library(lubridate)
 library(RMySQL)
-library(plyr)
+## library(plyr)
 library(reshape2)
 m <- dbDriver("MySQL")
+print("done loading packages")
 
 start.date <- Sys.Date() - 1
 end.date <- Sys.Date() - 1
@@ -79,7 +80,11 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
   
 }
 
-write.csv(ratingsdf, file=paste("/home/developer/cron_results/sessions_",Sys.Date(),".csv",sep='')
+Session_Number(start.date=start.date,end.date=end.date)
+
+write.csv(ratingsdf, file=paste("/home/developer/cron_results/sessions_",Sys.Date(),".csv",sep=''))
+print("done")
+### END ###
 
   
   

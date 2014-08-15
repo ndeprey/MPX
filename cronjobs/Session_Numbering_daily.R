@@ -76,14 +76,17 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
   }
   close(pb)
   
-  assign("ratingsdf",df, envir = .GlobalEnv)
+  return(df)
   
 }
 
-Session_Number(start.date=start.date,end.date=end.date)
+## Call the function ##
+ratingsdf <- Session_Number(start.date=start.date,end.date=end.date)
 
 write.csv(ratingsdf, file=paste("/home/developer/cron_results/sessions_daily",Sys.Date()-1,".csv",sep=''))
+
 print("done")
+
 ### END ###
 
   

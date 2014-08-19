@@ -35,20 +35,26 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
   ## Based on criteria for identifying the beginning of a session, assign a "1" to the start of sessions
   ## and increment the number by one until a new session begins
   df$story_num[1] <- 1
+  df$session_id[1] <- 1
   pb <- txtProgressBar(max=nrow(df), style=2)
   for(i in 2:nrow(df)){
     setTxtProgressBar(pb, i)
     if (
+      ## if any of the criteria below are met, its a new session
       any(
         df$ratings_origin[i]=="STID"&& 
          difftime(df$ratings_timestamp[i],df$ratings_timestamp[i-1],units="min") >30 &&
           grepl("^id",df$ratings_media_id[i],perl=TRUE),
         df$ratings_user_id[i]!=df$ratings_user_id[i-1]
       )) {
+      ## start the story count over and augment the session id
       df$story_num[i] <- 1
+      df$session_id[i] <- df$session_id[i-1] + 1
     }
     else {
+      ## if it's not the start of a new session, augment the story count and and assign the same session id
       df$story_num[i] <- df$story_num[i-1] + 1
+      df$session_id[i] <- df$session_id[i-1]
     }
   }
   close(pb)
@@ -58,6 +64,17 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
               "unique users and", 
               length(df$ratings_origin[df$story_num==1]),
               "sessions"))
+  
+  ## mark the last story in each session
+  df$is.last[1] = FALSE
+  for(i in 2:nrow(df)){
+    if(df$story_num!=1){
+      df$is.last[i] <- FALSE
+    }
+    else{
+      df$is.last[i-1] <- TRUE
+    }
+  }
   
   ## Calculate the running sum of seconds elapsed within the session using the ratings_elapsed field
   pb <- txtProgressBar(max=nrow(df), style=2)

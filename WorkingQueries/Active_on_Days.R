@@ -79,5 +79,5 @@ ActiveOnDays <- function(start.date, end.date, days.back=7, platforms=default.pl
   print(paste("active throughtout =", active.throughout))
   
   ## Assign the frequency table to the gloval environment
-  assign("frequency",frequency,envir = .GlobalEnv)
+  return(frequency)
 }

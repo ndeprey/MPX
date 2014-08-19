@@ -72,7 +72,7 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
   }
   close(pb)
   
-  assign("ratingsdf",df, envir = .GlobalEnv)
+  return(df)
   
 }
 

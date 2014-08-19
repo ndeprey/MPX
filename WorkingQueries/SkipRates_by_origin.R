@@ -41,6 +41,7 @@ SkipRates_by_origin <- function(start.date, end.date, platforms=default.platform
       
       pivot_agg$TOTAL[i] <- sum(pivot_agg$SKIP[i], pivot_agg$COMPLETED[i], pivot_agg$START[i], pivot_agg$THUMBUP[i], pivot_agg$SHARE[i])
         
+      pivot_agg$start_rate[i] <- pivot_agg$START[i] / pivot_agg$TOTAL[i]
       pivot_agg$skip_rate[i] <- pivot_agg$SKIP[i] / pivot_agg$TOTAL[i]
       pivot_agg$instant_skip_rate[i] <- pivot_agg$instant_skips[i] / pivot_agg$TOTAL[i]
       pivot_agg$completion_rate[i] <- pivot_agg$COMPLETED[i] / pivot_agg$TOTAL[i]
@@ -48,6 +49,6 @@ SkipRates_by_origin <- function(start.date, end.date, platforms=default.platform
       pivot_agg$thumbup_rate[i] <- pivot_agg$THUMBUP[i] / pivot_agg$TOTAL[i]
   }
     
-  assign("skips_by_origin",pivot_agg, envir = .GlobalEnv)
+  return(pivot_agg)
   assign("all_ratings",df, envir = .GlobalEnv)
 }

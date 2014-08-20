@@ -22,8 +22,8 @@ default.platforms <- c('IPHONE', 'ANDROID')
 ### this only works if you're on the dev server
 try(setwd("/home/developer/MPX/cronjobs/results"))
 
-start.date <- Sys.Date() - 23
-end.date <- Sys.Date() - 23
+start.date <- Sys.Date() - 1
+end.date <- Sys.Date() - 7
 
 ##
 ## Declare Functions ##
@@ -89,13 +89,16 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
   ## mark the last story in each session
   df$is.last[1] = FALSE
   for(i in 2:nrow(df)){
-    if(df$story_num!=1){
+    setTxtProgressBar(pb, i)
+    if(df$story_num[i]!=1){
       df$is.last[i] <- FALSE
     }
     else{
       df$is.last[i-1] <- TRUE
     }
   }
+  close(pb)
+  print("done marking last story")
   
   ## Calculate the running sum of seconds elapsed within the session using the ratings_elapsed field
   pb <- txtProgressBar(max=nrow(df), style=2)
@@ -113,6 +116,7 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
   return(df)
   
 }
+print("Completed marking last story and all Session Numbering. Moving onto Ratings_to_Sessions function")
 
 
 

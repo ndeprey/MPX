@@ -69,6 +69,7 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
   ## mark the last story in each session
   df$is.last[1] = FALSE
   for(i in 2:nrow(df)){
+    setTxtProgressBar(pb, i)
     if(df$story_num!=1){
       df$is.last[i] <- FALSE
     }
@@ -76,6 +77,8 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
       df$is.last[i-1] <- TRUE
     }
   }
+  close(pb)
+  print("Done finding last story in each session")
   
   ## Calculate the running sum of seconds elapsed within the session using the ratings_elapsed field
   pb <- txtProgressBar(max=nrow(df), style=2)

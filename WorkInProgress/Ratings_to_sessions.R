@@ -1,4 +1,5 @@
-## Start with output of Session_Number
+## Starts with output of Session_Number and converts to df of sessions
+## this file contains only the function and requires a dataframe to proceed
 ## df <- Session_Number(start.date,end.date)
 
 Ratings_to_session <- function(df) {

@@ -1,17 +1,33 @@
+#########################################################
+########### SQL_to_Ratings_to_Sessions ##################
+#########################################################
 
+#### This function: 
+######## starts with a SQL query, 
+######## pulls down ratings ordered by user id and timestamp
+######## determines the session start and end points
+######## groups them into sessions assigning key metadata in a new dataframe
+######## performs key analysis on skips and completes
+######## and finally writes to a csv in the same directory
 
-# default.platforms <- c('IPHONE')
-default.platforms <- c('IPHONE', 'ANDROID')
+## Declare key variables and load libraries
+
 library(lubridate)
 library(RMySQL)
 library(plyr)
 library(reshape2)
 m <- dbDriver("MySQL")
-## setwd("/home/developer/MPX/cronjobs/results")
+default.platforms <- c('IPHONE', 'ANDROID')
+
+### this only works if you're on the dev server
+try(setwd("/home/developer/MPX/cronjobs/results"))
 
 startdate <- Sys.Date() - 1
-enddate <- Sys.Date() -1
+enddate <- Sys.Date() - 4
 
+##
+## Declare Functions ##
+##
 
 Session_Number <- function(start.date, end.date, session_timeout=30, platforms=default.platforms, driver=m, group="stage4") {
   # start.date <- '2014-07-12'
@@ -99,11 +115,14 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
 }
 
 
-ratings_last3 <- Session_Number(startdate,enddate)
-write.csv(ratings_last3, file=paste("session_number",enddate,"_3_days.csv",sep=""))
 
-## Start with output of Session_Number
-## df <- Session_Number(start.date,end.date)
+## Optional write to csv ###
+## write.csv(ratings_last3, file=paste("session_number",enddate,"_3_days.csv",sep=""))
+
+
+
+## This function starts with the output of Session_Number and converts it into
+## a df of sessions aggregating groups of ratings
 
 Ratings_To_Sessions <- function(df) {
   
@@ -124,7 +143,7 @@ Ratings_To_Sessions <- function(df) {
   session.id <- numeric()
   ratings_user_id <- numeric()
   length.seconds <- numeric()
-  start_time <- numeric()
+  start_time <- c()
   story_count <- numeric()
   
   for(i in 1:max(df$session_id)){
@@ -132,7 +151,7 @@ Ratings_To_Sessions <- function(df) {
     session.id[i] <- i
     ratings_user_id[i] <- df$ratings_user_id[df$session_id==i][1]
     length.seconds[i] <- max(df$session_runtime[df$session_id==i])
-    start_time[i] <- df$ratings_timestamp[(df$session_id==i) & (df$story_num==1)]
+    start_time[i] <- as.POSIXct(df$ratings_timestamp[(df$session_id==i) & (df$story_num==1)])
     story_count[i] <- max(df$story_num[df$session_id==i])
     
   }
@@ -140,7 +159,7 @@ Ratings_To_Sessions <- function(df) {
   sessionsdf <- data.frame(session.id = session.id, ratings_user_id = ratings_user_id, length.seconds = length.seconds, start_time = start_time, story_count = story_count)
   close(pb)
   
-  print("done assignign core session metadata")
+  print("done assigning core session metadata")
   
   ## More manipulation
   pb <- txtProgressBar(max=nrow(sessionsdf), style=2)
@@ -164,6 +183,7 @@ Ratings_To_Sessions <- function(df) {
   print("done calculating skip metrics")
   
   for(i in 1:max(df$session_id)){
+    setTxtProgressBar(pb, i)
     sessionsdf$completes[i] <- length(df$ratings_rating[(df$ratings_rating=="COMPLETED") & (df$session_id==i)])
     sessionsdf$consec.completes.exist[i] <- find.repeats(df$ratings_rating[df$session_id==i],'COMPLETED',2)
     
@@ -178,15 +198,25 @@ Ratings_To_Sessions <- function(df) {
       sessionsdf$consec.completes.patterns[i] <- 0
     }
   }
+  close(pb)
   
   return(sessionsdf)
   
 }
 
+#########################
+### Run the Functions ###
+#########################
+
+ratings_last3 <- Session_Number(startdate,enddate)
 
 Sessions.last.3 <- Ratings_To_Sessions(ratings_last3)
 
+
+### write to csv
 write.csv(Sessions.last.3, file=paste("sessions_",enddate,".csv",sep=''))
 
 
-  
+
+##### END ######
+

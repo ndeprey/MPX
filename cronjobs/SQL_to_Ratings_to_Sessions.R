@@ -116,7 +116,7 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
   return(df)
   
 }
-print("Completed marking last story and all Session Numbering. Moving onto Ratings_to_Sessions function")
+
 
 
 
@@ -213,7 +213,7 @@ Ratings_To_Sessions <- function(df) {
 #########################
 
 ratings_last3 <- Session_Number(start.date,end.date)
-
+print("Completed all Session Numbering. Moving onto Ratings_to_Sessions function")
 Sessions.last.3 <- Ratings_To_Sessions(ratings_last3)
 
 

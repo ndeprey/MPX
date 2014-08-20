@@ -22,8 +22,8 @@ default.platforms <- c('IPHONE', 'ANDROID')
 ### this only works if you're on the dev server
 try(setwd("/home/developer/MPX/cronjobs/results"))
 
-startdate <- Sys.Date() - 1
-enddate <- Sys.Date() - 4
+start.date <- Sys.Date() - 23
+end.date <- Sys.Date() - 23
 
 ##
 ## Declare Functions ##
@@ -208,13 +208,13 @@ Ratings_To_Sessions <- function(df) {
 ### Run the Functions ###
 #########################
 
-ratings_last3 <- Session_Number(startdate,enddate)
+ratings_last3 <- Session_Number(start.date,end.date)
 
 Sessions.last.3 <- Ratings_To_Sessions(ratings_last3)
 
 
 ### write to csv
-write.csv(Sessions.last.3, file=paste("sessions_",enddate,".csv",sep=''))
+write.csv(Sessions.last.3, file=paste("sessions_",end.date,".csv",sep=''))
 
 
 

@@ -27,8 +27,9 @@ for (con in cons){
 ### this only works if you're on the dev server
 try(setwd("/home/developer/MPX/cronjobs/results"))
 
-start.date <- Sys.Date() - 1
-end.date <- Sys.Date() - 7
+start.date <- Sys.Date() - 7
+end.date <- Sys.Date() - 1
+print(paste("for start date of",start.date,"and end date of",end.date))
 
 ##
 ## Declare Functions ##

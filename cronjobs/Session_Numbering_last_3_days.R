@@ -7,6 +7,7 @@ library(RMySQL)
 library(plyr)
 library(reshape2)
 m <- dbDriver("MySQL")
+setwd("/home/developer/MPX/cronjobs/results")
 
 Session_Number <- function(start.date, end.date, session_timeout=30, platforms=default.platforms, driver=m, group="stage4") {
   # start.date <- '2014-07-12'
@@ -96,4 +97,5 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
 startdate <- Sys.Date() - 4
 enddate <- Sys.Date() -1
 last3 <- Session_Number(startdate,enddate)
+write.csv(last3, file=paste("session_number",enddate,"_3_days.csv",sep=""))
   

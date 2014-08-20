@@ -19,6 +19,11 @@ library(reshape2)
 m <- dbDriver("MySQL")
 default.platforms <- c('IPHONE', 'ANDROID')
 
+## IF YOU GET AN ERROR for too many connections open, use the following code
+cons <- dbListConnections(MySQL())
+for (con in cons){
+  dbDisconnect(con) }
+
 ### this only works if you're on the dev server
 try(setwd("/home/developer/MPX/cronjobs/results"))
 

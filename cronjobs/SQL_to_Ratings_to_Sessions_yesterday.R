@@ -211,7 +211,7 @@ Ratings_To_Sessions <- function(df) {
   close(pb)
   
   return(sessionsdf)
-  write.csv(df, file=paste("ratings_",end.date,".csv",sep=''))
+  write.csv(df, file=paste("ratings_yesterday_",end.date,".csv",sep=''))
 }
 
 #########################

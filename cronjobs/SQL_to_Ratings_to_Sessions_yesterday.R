@@ -224,7 +224,7 @@ Sessions.last.3 <- Ratings_To_Sessions(ratings_last3)
 
 
 ### write to csv
-write.csv(Sessions.last.3, file=paste("sessions_",end.date,".csv",sep=''))
+write.csv(Sessions.last.3, file=paste("sessions_yesterday_",end.date,".csv",sep=''))
 
 
 

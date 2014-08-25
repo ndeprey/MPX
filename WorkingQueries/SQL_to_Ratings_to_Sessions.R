@@ -211,19 +211,24 @@ Ratings_To_Sessions <- function(df) {
   close(pb)
   
   return(sessionsdf)
-  write.csv(df, file=paste("ratings_",end.date,".csv",sep=''))
+  
 }
 
 #########################
 ### Run the Functions ###
 #########################
 
+## Call the Session_Number function
 ratings_last3 <- Session_Number(start.date,end.date)
+
+## Write the ratings output to CSV
+try(write.csv(ratings_last3, file=paste("ratings_",end.date,".csv",sep='')))
 print("Completed all Session Numbering. Moving onto Ratings_to_Sessions function")
+
+## Call the sessions function on the ratings output
 Sessions.last.3 <- Ratings_To_Sessions(ratings_last3)
 
-
-### write to csv
+### Write the final output to csv
 write.csv(Sessions.last.3, file=paste("sessions_",end.date,".csv",sep=''))
 
 

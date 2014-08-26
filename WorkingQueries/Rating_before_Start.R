@@ -8,8 +8,7 @@ m <- dbDriver("MySQL")
 try(setwd("/home/developer/MPX/cronjobs/results"))
 
 Ratings_Before_Start <- function(start.date, end.date, session_timeout=30, platforms=default.platforms, driver=m, group="stage4") {
-  start.date <- '2014-08-19'
-  end.date <- '2014-08-21'
+  
   
   #Fetch the ratings data from input parameters and sort by user id and timestamp  
   con <- dbConnect(m, group = group)
@@ -25,7 +24,9 @@ Ratings_Before_Start <- function(start.date, end.date, session_timeout=30, platf
 
   starts <- df[df$ratings_rating=='START',]
   
+  pb <- txtProgressBar(max=nrow(df), style=2)
   for(i in 1:nrow(starts)){
+    setTxtProgressBar(pb, i)
     matched <- which(
       df$ratings_user_id==starts$ratings_user_id[i]
       & df$ratings_rating=='START'
@@ -34,11 +35,17 @@ Ratings_Before_Start <- function(start.date, end.date, session_timeout=30, platf
     as.character(starts$prev2[i] <- df$ratings_rating[matched - 2])
     as.character(starts$prev3[i] <- df$ratigns_rating[matched - 3])
   }
+  close(pb)
+  
   
   return(starts)
 }
 
+
+start.date <- '2014-08-19'
+end.date <- '2014-08-21'
+
 startsdf <- Ratings_Before_Start(start.date,end.date)
-write.csv(startsdf,file="startsdf_08_21.csv")
+write.csv(startsdf,file=paste("startsdf_",end.date,sep=""))
 
 

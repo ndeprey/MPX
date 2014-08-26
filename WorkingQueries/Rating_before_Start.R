@@ -39,5 +39,6 @@ Ratings_Before_Start <- function(start.date, end.date, session_timeout=30, platf
 }
 
 startsdf <- Ratings_Before_Start(start.date,end.date)
+write.csv(startsdf,file="startsdf_08_21.csv")
 
 

@@ -160,6 +160,26 @@ Ratings_To_Sessions <- function(df) {
   }
   close(pb)
   
+  ## Searches
+  
+  for(i in 1:max(df$session_id)){
+    setTxtProgressBar(pb, i)
+    sessionsdf$searches[i] <- length(df$ratings_rating[(df$ratings_origin=="SEARCH") & (df$session_id==i)])
+    sessionsdf$consec.searches.exist[i] <- find.repeats(df$ratings_origin[df$session_id==i],'SEARCH',2)
+    
+    if(sessionsdf$consec.searches.exist[i] == TRUE){
+      rl <- rle(as.character(df$ratings_origin[df$session_id==i]))
+      sessionsdf$max.consec.searches[i] <- max(rl$lengths[rl$value=="SEARCH"])
+      sessionsdf$consec.search.patterns[i] <- length(rl$lengths[(rl$value=="SEARCH") & (rl$lengths>=2)])
+    }
+    
+    else{
+      sessionsdf$max.consec.searches[i] <- 0
+      sessionsdf$consec.search.patterns[i] <- 0
+    }
+  }
+  close(pb)
+  
   sessionsdf$activity <- sessionsdf$skips + sessionsdf$thumbups
   
   return(sessionsdf)

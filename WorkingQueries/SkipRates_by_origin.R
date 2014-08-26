@@ -23,7 +23,7 @@ SkipRates_by_origin <- function(start.date, end.date, platforms=default.platform
   SQLstatement <- paste("SELECT ratings_user_id, ratings_media_id, ratings_rating, ratings_timestamp, ratings_origin, ratings_elapsed FROM infinite.user_ratings ", 
                         "WHERE ratings_platform IN ('", paste(default.platforms, collapse="', '"), "') ",
                         "AND ratings_rating IN ('SKIP', 'COMPLETED', 'START','THUMBUP','SHARE')",
-                        "AND ratings_origin NOT IN ('INTRO','STID','SEARCH','XAPPAD','XAPPPROMO','SPONS','DONATE','EDTR','SHARED') ",
+                        "AND ratings_origin NOT IN ('INTRO','HELLO','STID','SEARCH','XAPPAD','XAPPPROMO','SPONS','DONATE','EDTR','SHARED') ",
                         "AND DATE(ratings_timestamp) >= '", start.date, "' ",
                         "AND DATE(ratings_timestamp) <= '", end.date, "' ",
                         "ORDER BY ratings_user_id ASC, TIMESTAMP(ratings_timestamp) ASC", sep='')

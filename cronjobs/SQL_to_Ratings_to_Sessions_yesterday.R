@@ -155,23 +155,31 @@ Ratings_To_Sessions <- function(df) {
   length.seconds <- numeric()
   start_time <- c()
   story_count <- numeric()
+  session.cohort <- c()
+  local.newscast <- c()
+  local.story <- c()
   
   for(i in 1:max(df$session_id)){
     setTxtProgressBar(pb, i)
+    sdf <- df[df$session_id==i,]
     session.id[i] <- i
-    ratings_user_id[i] <- df$ratings_user_id[df$session_id==i][1]
-    length.seconds[i] <- max(df$session_runtime[df$session_id==i])
-    start_time[i] <- as.POSIXct(df$ratings_timestamp[(df$session_id==i) & (df$story_num==1)])
-    story_count[i] <- max(df$story_num[df$session_id==i])
-    
+    session.cohort[i] <- sdf$ratings_cohort[1]
+    ratings_user_id[i] <- sdf$ratings_user_id[1]
+    length.seconds[i] <- max(sdf$session_runtime)
+    start_time[i] <- as.POSIXct(sdf$ratings_timestamp[1])
+    story_count[i] <- max(sdf$story_num)
+    local.newscast[i] <- any(sdf$ratings_origin=="LOCALNC")
+    local.story[i] <- length(sdf$ratings_origin[sdf$ratings_origin=='ORGZN'])
   }
   
-  sessionsdf <- data.frame(session.id = session.id, ratings_user_id = ratings_user_id, length.seconds = length.seconds, start_time = start_time, story_count = story_count)
+  sessionsdf <- data.frame(session.id = session.id, ratings_user_id = ratings_user_id, session.cohort = session.cohort,
+                           length.seconds = length.seconds, start_time = start_time, 
+                           story_count = story_count, local.newscast=local.newscast, local.story=local.story)
   close(pb)
   
   print("done assigning core session metadata")
   
-  ## More manipulation
+  ## Count the skips, find repeat patterns in skips
   pb <- txtProgressBar(max=nrow(sessionsdf), style=2)
   for(i in 1:max(df$session_id)){
     setTxtProgressBar(pb, i)
@@ -192,6 +200,7 @@ Ratings_To_Sessions <- function(df) {
   close(pb)
   print("done calculating skip metrics")
   
+  ## count the completes, find the repeat patterns in completes
   for(i in 1:max(df$session_id)){
     setTxtProgressBar(pb, i)
     sessionsdf$completes[i] <- length(df$ratings_rating[(df$ratings_rating=="COMPLETED") & (df$session_id==i)])

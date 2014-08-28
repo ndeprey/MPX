@@ -24,6 +24,9 @@ cons <- dbListConnections(MySQL())
 for (con in cons){
   dbDisconnect(con) }
 
+#For measuring speed of query
+query.start.time <- Sys.time()
+
 ### this only works if you're on the dev server
 try(setwd("/home/developer/MPX/cronjobs/results"))
 
@@ -239,6 +242,13 @@ Sessions.last.3 <- Ratings_To_Sessions(ratings_last3)
 
 ### Write the final output to csv
 write.csv(Sessions.last.3, file=paste("sessions_",end.date,".csv",sep=''))
+
+query.end.time <- Sys.time()
+query.runtime <- as.numeric(query.end.time - query.start.time) / 60
+seconds.per.row <- (query.runtime*60)/nrow(ratings_last3)
+print(paste("this query started at",query.start.time,"and finished at",query.end.time))
+print(paste("total runtime was",query.runtime,"minutes"))
+print(paste("processing speed was",seconds.per.row,"seconds per row"))
 
 
 

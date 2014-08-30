@@ -46,6 +46,7 @@ Session_Number <- function(start.date, end.date, session_timeout=30, platforms=d
   con <- dbConnect(m, group = group)
   SQLstatement <- paste("SELECT ratings_user_id, 
                         ratings_media_id, 
+                        ratings_story_id,
                         ratings_rating, ratings_timestamp, 
                         ratings_origin, 
                         ratings_elapsed, 

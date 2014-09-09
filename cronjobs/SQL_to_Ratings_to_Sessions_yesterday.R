@@ -243,10 +243,10 @@ write.csv(Sessions.last.3, file=paste("sessions_yesterday_",end.date,".csv",sep=
 
 query.end.time <- Sys.time()
 query.runtime <- as.numeric(query.end.time - query.start.time) / 60
-seconds.per.row <- (query.runtime*60)/nrow(ratings_yesterday)
+# seconds.per.row <- (query.runtime*60)/nrow(ratings_yesterday)
 print(paste("this query started at",query.start.time,"and finished at",query.end.time))
-print(paste("total runtime was",query.runtime,"minutes"))
-print(paste("processing speed was",seconds.per.row,"seconds per row"))
+# print(paste("total runtime was",query.runtime,"minutes"))
+# print(paste("processing speed was",seconds.per.row,"seconds per row"))
 
 ##### END ######
 

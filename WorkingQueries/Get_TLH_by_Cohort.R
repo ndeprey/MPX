@@ -10,7 +10,7 @@ default.platforms <- c('IPHONE', 'ANDROID')
 ### this only works if you're on the dev server
 try(setwd("/home/developer/MPX/cronjobs/results"))
 
-start.date <- Sys.Date() - 2
+start.date <- Sys.Date() - 5
 end.date <- Sys.Date() - 1
 
 ##

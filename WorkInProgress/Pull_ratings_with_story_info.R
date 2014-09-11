@@ -60,9 +60,9 @@ start.date <- Sys.Date() - 21
 end.date <- Sys.Date() - 1
 print(paste("for start date of",start.date,"and end date of",end.date))
 
-default.origins = c('INVEST','SELECTS','BREAK','OPENDOOR','ARCHIVES')
+default.origins <- c('INVEST','SELECTS','BREAK','OPENDOOR','ARCHIVES')
 
-df <- Get_ratings_story_info(start.date, end.date, default.origins=default.origins)
+df <- Get_ratings_story_info(start.date = start.date, end.date = end.date, origins = default.origins)
 
 write.csv(df,file=paste("ratings_story",end.date,".csv",sep=''))
 

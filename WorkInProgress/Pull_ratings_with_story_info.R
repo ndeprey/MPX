@@ -25,7 +25,7 @@ try(setwd("/home/developer/MPX/cronjobs/results"))
 ## Declare Functions ##
 ##
 
-Get_ratings_story_info <- function(start.date, end.date, default.origins, session_timeout=30, platforms=default.platforms, driver=m, group="stage4") {
+Get_ratings_story_info <- function(start.date, end.date, origins, session_timeout=30, platforms=default.platforms, driver=m, group="stage4") {
   #start.date <- '2014-08-31'
   #end.date <- '2014-08-31'
   # group = "stage4"
@@ -60,7 +60,9 @@ start.date <- Sys.Date() - 21
 end.date <- Sys.Date() - 1
 print(paste("for start date of",start.date,"and end date of",end.date))
 
-df <- Get_ratings_story_info(start.date, end.date)
+default.origins = c('INVEST','SELECTS','BREAK','OPENDOOR','ARCHIVES')
+
+df <- Get_ratings_story_info(start.date, end.date, default.origins=default.origins)
 
 write.csv(df,file=paste("ratings_story",end.date,".csv",sep=''))
 

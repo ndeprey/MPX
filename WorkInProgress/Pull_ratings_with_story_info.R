@@ -8,6 +8,7 @@ library(plyr)
 library(reshape2)
 m <- dbDriver("MySQL")
 default.platforms <- c('IPHONE', 'ANDROID')
+default.origins <- c('INVEST','SELECTS','BREAK','OPENDOOR','LEAD','CORE','NONFICTION','ARCHIVES','ASSIST')
 
 ## IF YOU GET AN ERROR for too many connections open, use the following code
 cons <- dbListConnections(MySQL())
@@ -24,7 +25,7 @@ try(setwd("/home/developer/MPX/cronjobs/results"))
 ## Declare Functions ##
 ##
 
-Get_ratings_story_info <- function(start.date, end.date, session_timeout=30, platforms=default.platforms, driver=m, group="stage4") {
+Get_ratings_story_info <- function(start.date, end.date, default.origins, session_timeout=30, platforms=default.platforms, driver=m, group="stage4") {
   #start.date <- '2014-08-31'
   #end.date <- '2014-08-31'
   # group = "stage4"
@@ -41,6 +42,7 @@ Get_ratings_story_info <- function(start.date, end.date, session_timeout=30, pla
                         "FROM infinite.user_ratings ", 
                         "INNER JOIN cms.thing on user_ratings.ratings_story_id = thing.thing_id ",
                         "WHERE user_ratings.ratings_platform IN ('", paste(default.platforms, collapse="', '"), "') ",
+                        "AND user_ratings.ratings_origin IN ('", paste(default.origins, collapse="', '"), "') ",
                         "AND DATE(user_ratings.ratings_timestamp) >= '", start.date, "' ",
                         "AND DATE(user_ratings.ratings_timestamp) <= '", end.date, "' ",
                         "ORDER BY user_ratings.ratings_user_id ASC, TIMESTAMP(user_ratings.ratings_timestamp) ASC", sep='')

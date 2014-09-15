@@ -16,8 +16,8 @@ query.start.time <- Sys.time()
 ### this only works if you're on the dev server
 try(setwd("/home/developer/MPX/cronjobs/results"))
 
-start.date <- Sys.Date() - 2
-end.date <- Sys.Date() - 2
+start.date <- Sys.Date() - 5
+end.date <- Sys.Date() - 4
 print(paste("for start date of",start.date,"and end date of",end.date))
 
 ##
@@ -59,6 +59,10 @@ Ratings_to_user_days <- function(start.date, end.date, platforms=default.platfor
   mark_rate <- numeric()
   start.time <- c()
   date <- c()
+  searchstarts <- numeric()
+  searchcompletes <- numeric()
+  skips <- numeric()
+  marks <- numeric()
   
   pb <- txtProgressBar(max=length(unique(df$user_day_id)), style=2)
   
@@ -68,13 +72,20 @@ Ratings_to_user_days <- function(start.date, end.date, platforms=default.platfor
     l <- nrow(sdf)
     user_day_id[i] <- sdf$user_day_id[1]
     user_id[i] <- sdf$ratings_user_id[1]
-    skip_rate[i] <- nrow(sdf[sdf$ratings_rating=="SKIP",]) / l
-    mark_rate[i] <- nrow(sdf[sdf$ratings_rating=="THUMBUP",]) / l
+    skips[i] <- nrow(sdf[sdf$ratings_rating=="SKIP",])
+    skip_rate[i] <- skips[i] / l
+    marks[i] <- nrow(sdf[sdf$ratings_rating=="THUMBUP",])
+    mark_rate[i] <- marks[i] / l
+    searchstarts[i] <- nrow(sdf[sdf$ratings_rating=="SRCHSTART"],)
+    searchcompletes[i] <- nrow(sdf[sdf$ratings_rating=="SRCHCOMPL",])
     TLM[i] <- sum(sdf$ratings_elapsed) / 60
+    
   }
   
   close(pb)
-  user_days <- data.frame(user_day_id = user_day_id, user_id = user_id, skip_rate = skip_rate, mark_rate = mark_rate, TLM = TLM)
+  user_days <- data.frame(user_day_id = user_day_id, user_id = user_id, skips=skips, skip_rate = skip_rate, 
+                          marks = marks, mark_rate = mark_rate, searchstarts=searchstarts, 
+                          searchcompletes=searchcompletes,TLM = TLM)
   
   print("done")
   
@@ -82,5 +93,5 @@ Ratings_to_user_days <- function(start.date, end.date, platforms=default.platfor
 }
 
 user_days <- Ratings_to_user_days(start.date=start.date, end.date=end.date)
-
+write.csv(user_days, file=paste("userdays_",start.date,"_",end.date,".csv",sep=""))
   

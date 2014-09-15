@@ -76,7 +76,7 @@ Ratings_to_user_days <- function(start.date, end.date, platforms=default.platfor
     skip_rate[i] <- skips[i] / l
     marks[i] <- nrow(sdf[sdf$ratings_rating=="THUMBUP",])
     mark_rate[i] <- marks[i] / l
-    searchstarts[i] <- nrow(sdf[sdf$ratings_rating=="SRCHSTART"],)
+    searchstarts[i] <- nrow(sdf[sdf$ratings_rating=="SRCHSTART",])
     searchcompletes[i] <- nrow(sdf[sdf$ratings_rating=="SRCHCOMPL",])
     TLM[i] <- sum(sdf$ratings_elapsed) / 60
     

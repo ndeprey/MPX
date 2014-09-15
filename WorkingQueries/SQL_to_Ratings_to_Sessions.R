@@ -242,7 +242,7 @@ print("Completed all Session Numbering. Moving onto Ratings_to_Sessions function
 Sessions.last.3 <- Ratings_To_Sessions(ratings_last3)
 
 ### Write the final output to csv
-write.csv(Sessions.last.3, file=paste("sessions_",end.date,".csv",sep=''))
+write.csv(Sessions.last.3, file=paste("sessions_",start.date,"_",end.date,".csv",sep=''))
 
 query.end.time <- Sys.time()
 query.runtime <- as.numeric(query.end.time - query.start.time) / 60

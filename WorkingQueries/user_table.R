@@ -92,4 +92,4 @@ Get_user_matrix <- function(start.date, end.date, platforms=default.platforms, d
 }
 
 users <- Get_user_matrix(start.date, end.date)
-write.csv(users, file=paste("users",start.date,end.date,sep="_"))
+write.csv(users, file=paste("users",start.date,end.date,".csv",sep="_"))

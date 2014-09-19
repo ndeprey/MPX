@@ -18,7 +18,7 @@ query.start.time <- Sys.time()
 ### this only works if you're on the dev server
 try(setwd("/home/developer/MPX/cronjobs/results"))
 
-start.date <- Sys.Date() - 14
+start.date <- Sys.Date() - 1
 end.date <- Sys.Date() - 1
 print(paste("for start date of",start.date,"and end date of",end.date))
 
@@ -60,23 +60,33 @@ Get_user_matrix <- function(start.date, end.date, platforms=default.platforms, d
   instant_skips <- numeric()
   marks <- numeric()
   ratings <- numeric()
+  localNCs <- numeric()
+  local.stories <- numeric()
+  cohort <- c()
   
   pb <- txtProgressBar(max=length(uids), style=2)
   for(i in 1:length(uids)){
     setTxtProgressBar(pb, i)
     tdf <- df[df$ratings_user_id==uids[i],]
+    cohort[i] <- tdf$ratings_cohort[nrow(tdf)]
     TLM[i] <- sum(tdf$ratings_elapsed) / 60
     Days.active[i] <- length(unique(as.Date(tdf$ratings_timestamp)))
     HRNCs[i] <- nrow(tdf[tdf$ratings_origin=="HRNC",])
     searches[i] <- nrow(tdf[tdf$ratings_rating %in% c("SRCHSTART","SRCHCOMPL"),])
     skips[i] <- nrow(tdf[tdf$ratings_rating == "SKIP",])
     marks[i] <- nrow(tdf[tdf$ratings_rating == "THUMBUP",])
-    ratings[i] <- nrow(tdf)                 
+    ratings[i] <- nrow(tdf)
+    localNCs[i] <- nrow(tdf[tdf$ratings_origin=="LOCALNC",])
+    local.stories[i] <- nrow(tdf[tdf$ratings_origin=="ORGZN",])
+                     
   }
   
   close(pb)
   
-  users <- data.frame(uid = uids, TLM = TLM, days.active=Days.active, HRNCs = HRNCs, searches = searches, skips = skips, marks = marks, ratings = ratings)
+  users <- data.frame(uid = uids, TLM = TLM, days.active=Days.active, 
+                      HRNCs = HRNCs, searches = searches, skips = skips, 
+                      marks = marks, ratings = ratings, localNCs = localNCs,
+                      local.stories = local.stories)
   
   return(users)
 }

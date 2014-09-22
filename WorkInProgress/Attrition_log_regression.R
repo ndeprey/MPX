@@ -56,8 +56,9 @@ u$lapsed_09_07 <- u$LastDayActive <= "2014-09-07"
 #           + Break_skip_rate + Rated_skip_rate + Podcast_skip_rate)
 
 lapse <- function(df, lapse_date){
-
-  # lapse_var <- paste("df$","lapse_date",sep="")
+  ## lapsed_08_31 <- lapse(u, "2014-08-31")
+  ## returns a list of glm objects and accuracy calculations
+  
   df$lapse <- df$LastDayActive <= lapse_date
   df <- df[df$FirstDayActive <= lapse_date,]
   
@@ -83,8 +84,11 @@ lapse <- function(df, lapse_date){
   optimal.cutoff <- accs$cutoff[accs$accuracy == max(accs$accuracy)][1]
   best.accuracy <- max(accs$accuracy)
 
-  return.objects <- list("acc"=acc, "pred" = pred, "prec" = prec, "rec" = rec, "optimal.cutoff"=optimal.cutoff, "best.accuracy" = best.accuracy)
+  return.objects <- list("model" = model, "acc"=acc, "pred" = pred, "prec" = prec, "rec" = rec, "optimal.cutoff"=optimal.cutoff, "best.accuracy" = best.accuracy)
   
   return(return.objects)
-  
+  # print(paste("this model predicted attrition with ",best.accuracy," accuracy at a cutoff of ",optimal.cutoff,sep=""))
 }
+
+
+

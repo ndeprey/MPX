@@ -30,7 +30,7 @@ query.start.time <- Sys.time()
 ### this only works if you're on the dev server
 try(setwd("/home/developer/MPX/cronjobs/results"))
 
-start.date <- Sys.Date() - 5
+start.date <- Sys.Date() - 2
 end.date <- Sys.Date() - 1
 print(paste("for start date of",start.date,"and end date of",end.date))
 
@@ -162,18 +162,20 @@ Ratings_To_Sessions <- function(df) {
   session.cohort <- c()
   local.newscast <- c()
   local.story <- c()
+  rated.podcasts <- numeric
   
   for(i in 1:max(df$session_id)){
     setTxtProgressBar(pb, i)
     sdf <- df[df$session_id==i,]
     session.id[i] <- i
-    session.cohort[i] <- sdf$ratings_cohort[1]
+    session.cohort[i] <- sdf$ratings_cohort[nrow(sdf)]
     ratings_user_id[i] <- sdf$ratings_user_id[1]
     length.seconds[i] <- max(sdf$session_runtime)
     start_time[i] <- as.POSIXct(sdf$ratings_timestamp[1])
     story_count[i] <- max(sdf$story_num)
     local.newscast[i] <- any(sdf$ratings_origin=="LOCALNC")
     local.story[i] <- length(sdf$ratings_origin[sdf$ratings_origin=='ORGZN'])
+    rated.podcasts[i] <- length(sdf$ratings_origin[sdf$ratings_origin=='RATED'])
   }
   
   sessionsdf <- data.frame(session.id = session.id, ratings_user_id = ratings_user_id, session.cohort = session.cohort,

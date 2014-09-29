@@ -446,10 +446,15 @@ AQH <- function(start.date, end.date, platforms=default.platforms, sample.size=5
   end.date <- as.Date(end.date)
   
   user.ids <- GetValidUserIds(start.date=start.date, end.date=end.date, platforms=platforms)
-  if(length(user.ids) > sample.size) user.ids <- sample(user.ids, sample.size, replace=TRUE)
+  original.n <- length(user.ids)
+  if(original.n > sample.size) {
+    user.ids <- sample(user.ids, sample.size, replace=TRUE)
+  }
   
   pb <- txtProgressBar(max=length(user.ids), style=2)
   user.qh <- laply(1:length(user.ids), function(uid.index) {
+    #' Return an array with users as rows, quarter hours as columns, 
+    #' and entries TRUE if that user was listening that quarter hour for at least 5 minutes
     setTxtProgressBar(pb, uid.index)
     uid <- user.ids[uid.index]
     ur <- GetUserRatings(uid)
@@ -465,9 +470,12 @@ AQH <- function(start.date, end.date, platforms=default.platforms, sample.size=5
   })
   close(pb)
   
-  aqh <- mean(colSums(user.qh))
-  qh.count <- data.frame("qh"=colnames(user.qh),"listeners"=colSums(user.qh))
-  assign("qh.count",qh.count,envir= .GlobalEnv)
-  return(aqh)
+  aqh <- mean(colSums(user.qh)) * original.n / length(user.ids)
+  listeners.by.qh <- data.frame("qh.starting"=colnames(user.qh),
+                                "n.listeners"=colSums(user.qh) * original.n / length(user.ids))
+  rownames(listeners.by.qh) <- NULL
+  return(list(aqh=aqh, listeners.by.qh=listeners.by.qh))
 }
 #' AQH('2014-06-15', '2014-06-21')
+#' AQH('2014-09-28', '2014-09-28', sample.size=50)
+#' AQH('2014-09-21', '2014-09-27')

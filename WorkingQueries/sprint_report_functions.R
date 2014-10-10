@@ -238,20 +238,26 @@ GetUserDailyListening <- function(start.date, end.date, platforms=default.platfo
 # round(MeanNonZeroValues(udl <- GetUserDailyListening(start.date="2014-03-19", end.date="2014-04-18")), 1)
 # MeanNonZeroValues(GetUserDailyListening(start.date="2014-06-01", end.date="2014-06-16", platforms='ANDROID'))
 
+GetStories <- function(start.date, end.date, platforms=default.platforms, driver=m) {
+  ur <- GetAllUserRatings(start.date, end.date, platforms, driver)
+  return(unique(ur$ratings_story_id))
+}
+# story.ids <- GetStories("2014-10-01", "2014-10-10")
+
+  #########################
+  ###  Get Usage Array  ###
+  #########################
 UserSessionDurations <- function(start.date, 
                                  end.date, 
                                  max.n.users, 
                                  session.delta.seconds,
                                  platforms=default.platforms, 
                                  driver=m) {
-  
+
   start.date <- as.Date(start.date)
   end.date <- as.Date(end.date)
-  
-  #########################
-  ###  Get Usage Array  ###
-  #########################
-  # Require users to have have installed before period.start and have some activity during the period
+
+# Require users to have have installed before period.start and have some activity during the period
   cat("Generating list of users active during set period...\n")
   user.ids <- intersect(GetValidUserIds(end.date=start.date - 1),
                         GetValidUserIds(start.date=start.date, end.date=end.date))

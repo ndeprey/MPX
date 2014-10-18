@@ -14,6 +14,7 @@ library(plyr)
 ###  INITIALIZE KEY VARIABLES  ###
 ##################################
 m <- dbDriver("MySQL")
+mysql.group <- "stage4-infinite"
 # default.platforms <- c('IPHONE')
 default.platforms <- c('IPHONE', 'ANDROID')
 robo.ids <- c(11987982,
@@ -25,13 +26,13 @@ zip.db <- read.csv('~/Box Sync/work/NPR One metrics/zip_to_timezone/zipcode/zipc
 ##########################
 ###  DEFINE FUNCITONS  ###
 ##########################
-GetValidUserIds <- function(start.date, end.date, platforms=default.platforms, driver=m) {
+GetValidUserIds <- function(start.date, end.date, platforms=default.platforms, driver=m, group=mysql.group) {
   #' Returns a list of all user_ids in ratings table. Filters out known bots.
   #' Limits to defined list of default.platforms.  Given a date range it limits
   #' the list to those users active during that date range.
   #' 
   #' Limiting to a date range greatly speeds up the query.
-  con <- dbConnect(driver, group = "stage4")
+  con <- dbConnect(driver, group=group)
   SQLstatement <- paste("SELECT DISTINCT(ratings_user_id) FROM user_ratings ",
     "WHERE ratings_platform IN ('", 
     paste(platforms, collapse="', '"),
@@ -58,28 +59,28 @@ GetValidUserIds <- function(start.date, end.date, platforms=default.platforms, d
 # user.ids <- GetValidUserIds(start.date='2014-05-04', end.date='2014-05-04', platforms='ANDROID') # should return numeric(0)
 # user.ids
 
-CountUsersWithActivity <- function(start.date, end.date, platforms=default.platforms, driver=m) {
+CountUsersWithActivity <- function(start.date, end.date, platforms=default.platforms, driver=m, group=mysql.group) {
   #' Given a date range returns the number of users with activity in that range.
   #' Uses GetValidUserIds and counts results.
   if(missing(start.date)) {
     if(missing(end.date)) {
       user.ids <- GetValidUserIds(platforms=platforms, 
-                                  driver=driver)
+                                  driver=driver, group=group)
     } else {
       user.ids <- GetValidUserIds(end.date=end.date, 
                                   platforms=platforms, 
-                                  driver=driver)
+                                  driver=driver, group=group)
     }
   } else {
     if(missing(end.date)) {
       user.ids <- GetValidUserIds(start.date=start.date, 
                                   platforms=platforms, 
-                                  driver=driver)
+                                  driver=driver, group=group)
     } else {
       user.ids <- GetValidUserIds(start.date=start.date, 
                                   end.date=end.date, 
                                   platforms=platforms, 
-                                  driver=driver)
+                                  driver=driver, group=group)
     }
   }
   return(length(user.ids))
@@ -88,10 +89,10 @@ CountUsersWithActivity <- function(start.date, end.date, platforms=default.platf
 # CountUsersWithActivity(start="2014-05-18", end="2014-05-24", platforms='IPHONE')
 # CountUsersWithActivity(start="2014-05-18", end="2014-05-24", platforms='ANDROID')
 
-GetUserRatings <- function(user.id, driver=m) {
+GetUserRatings <- function(user.id, driver=m, group=mysql.group) {
   #' Given a user_id returns all the ratings (all fields) for that user.
   #' This is used in some other functions to analyze a single user's activity.
-  con <- dbConnect(driver, group = "stage4")
+  con <- dbConnect(driver, group = group)
   rs <- dbSendQuery(con, paste("SELECT * FROM user_ratings where ratings_user_id = '",
                                user.id, "' AND ratings_elapsed < 24*60*60", sep=""))
   df <- fetch(rs, n=-1)
@@ -103,9 +104,9 @@ GetUserRatings <- function(user.id, driver=m) {
 # str(user.ratings)
 # hist(user.ratings$ratings_timestamp, "weeks", freq=TRUE, main="Demian's Ratings", xlab="")
 
-GetAllUserRatings <- function(start.date, end.date, platforms=default.platforms, driver=m) {
+GetAllUserRatings <- function(start.date, end.date, platforms=default.platforms, driver=m, group=mysql.group) {
   #' Given a date range return all records from ratings for valid users
-  con <- dbConnect(driver, group = "stage4")
+  con <- dbConnect(driver, group = group)
   SQLstatement <- paste("SELECT * FROM user_ratings ",
                         "WHERE ratings_platform IN ('", 
                         paste(platforms, collapse="', '"),
@@ -129,10 +130,10 @@ GetAllUserRatings <- function(start.date, end.date, platforms=default.platforms,
   return(df)
 }
 
-GetUserActiveDates <- function(user.id, start.date, end.date, driver=m) {
+GetUserActiveDates <- function(user.id, start.date, end.date, driver=m, group=mysql.group) {
   #' Given a user_id returns all the ratings (all fields) for that user.
   #' This is used in some other functions to analyze a single user's activity.
-  con <- dbConnect(driver, group = "stage4")
+  con <- dbConnect(driver, group = group)
   SQLstatement <- paste("SELECT DISTINCT(DATE(ratings_timestamp)) as dates ",
                         "FROM user_ratings ",
                         "WHERE ratings_user_id = '", user.id, "'", sep='')
@@ -151,8 +152,8 @@ GetUserActiveDates <- function(user.id, start.date, end.date, driver=m) {
 }
 # GetUserActiveDates(1764670) # Demian
 
-GetUsers <- function(driver=m) {
-  con <- dbConnect(m, group = "marcus-public_user")
+GetUsers <- function(driver=m, group=mysql.group) {
+  con <- dbConnect(m, group = group)
   rs <- dbSendQuery(con, "SELECT * FROM public_user.mpx_beta_testers")
   users <- fetch(rs, n=-1)
   dbDisconnect(con)
@@ -162,8 +163,8 @@ GetUsers <- function(driver=m) {
 }
 #' users <- GetUsers()
 
-GetOrgs <- function(driver=m) {
-  con <- dbConnect(m, group = "marcus-public_user")
+GetOrgs <- function(driver=m, group=mysql.group) {
+  con <- dbConnect(m, group = group)
   rs <- dbSendQuery(con, "SELECT * FROM public_user.organization")
   orgs <- fetch(rs, n=-1)
   dbDisconnect(con)
@@ -171,8 +172,8 @@ GetOrgs <- function(driver=m) {
 }
 #' orgs <- GetOrgs()
 
-GetTLH <- function(start.date, end.date, platforms=default.platforms, driver=m) {
-  con <- dbConnect(driver, group = "stage4")
+GetTLH <- function(start.date, end.date, platforms=default.platforms, driver=m, group=mysql.group) {
+  con <- dbConnect(driver, group = group)
   SQLstatement <- paste("SELECT SUM(ratings_elapsed) FROM user_ratings ", 
     "WHERE ratings_platform IN ('", paste(platforms, collapse="', '"), "') ",
     "AND DATE(ratings_timestamp) >= '", start.date, "' ",
@@ -185,11 +186,11 @@ GetTLH <- function(start.date, end.date, platforms=default.platforms, driver=m) 
 }
 # GetTLH(start.date='2014-05-18', end.date='2014-05-24')
 
-GetTlhByHourOfDay <- function(start.date, end.date, platforms=default.platforms, driver=m) {
+GetTlhByHourOfDay <- function(start.date, end.date, platforms=default.platforms, driver=m, group=mysql.group) {
   
   cat("All times are local (including Daylight Saving) for the east coast.\n")
   
-  con <- dbConnect(driver, group = "stage4")
+  con <- dbConnect(driver, group = group)
   SQLstatement <- paste("SELECT HOUR(ratings_timestamp) as hour_of_day, SUM(ratings_elapsed) / 3600 as TLH ",
                         "FROM user_ratings ",
                         "WHERE ratings_platform IN ('", paste(platforms, collapse="', '"), "') ",
@@ -211,13 +212,13 @@ GetTlhByHourOfDay <- function(start.date, end.date, platforms=default.platforms,
 # tlh.by.hour <- GetTlhByHourOfDay(start.date='2014-01-01', end.date='2014-05-24')
 # plot(0:23, tlh.by.hour, type='l')
 
-GetUserDailyListening <- function(start.date, end.date, platforms=default.platforms, driver=m) {
+GetUserDailyListening <- function(start.date, end.date, platforms=default.platforms, driver=m, group=mysql.group) {
   #' Returns, for the period specified, for each user-active-day, the number of minutes that
   #' user listened on that day.  The mean of this given mean user daily listening per active day.
   #' 
   #' Note that this is not the same as time using the app because we are
   #' limiting these times to SKIP and COMPLETED ratings.
-  con <- dbConnect(driver, group = "stage4")
+  con <- dbConnect(driver, group = group)
   rs <- dbSendQuery(con, 
                     paste("SELECT SUM(ratings_elapsed) / 60 as daily_total_minutes FROM infinite.user_ratings ",
                           "WHERE DATE(ratings_timestamp) >= '", start.date, 
@@ -238,11 +239,33 @@ GetUserDailyListening <- function(start.date, end.date, platforms=default.platfo
 # round(MeanNonZeroValues(udl <- GetUserDailyListening(start.date="2014-03-19", end.date="2014-04-18")), 1)
 # MeanNonZeroValues(GetUserDailyListening(start.date="2014-06-01", end.date="2014-06-16", platforms='ANDROID'))
 
-GetStories <- function(start.date, end.date, platforms=default.platforms, driver=m) {
-  ur <- GetAllUserRatings(start.date, end.date, platforms, driver)
+GetStories <- function(start.date, end.date, platforms=default.platforms, driver=m, group=mysql.group) {
+  ur <- GetAllUserRatings(start.date=start.date, end.date=end.date,
+                          platforms=platforms, driver=driver, group=group)
   return(unique(ur$ratings_story_id))
 }
 # story.ids <- GetStories("2014-10-01", "2014-10-10")
+
+GetRatingRatesForStory <- function(story.id, 
+                                   platforms=default.platforms,
+                                   driver=m, 
+                                   group=mysql.group) {
+  con <- dbConnect(driver, group = group)
+  SQLstatement <- paste("SELECT ratings_rating, count(ratings_rating) FROM user_ratings ",
+                        "WHERE ratings_story_id = '", story.id, "' AND ",
+                        "ratings_user_id NOT IN (", paste(robo.ids, collapse=", "), ") AND ",
+                        "ratings_platform IN ('", paste(platforms, collapse="', '"),"') ",
+                        "GROUP BY ratings_rating",
+                        sep="")
+  rs <- dbSendQuery(con, SQLstatement)
+  ratings <- fetch(rs, n=-1)
+  dbDisconnect(con)
+  if(0==ncol(ratings)) return(NULL)
+  names(ratings) <- c("rating", "count")
+  ratings$share <- ratings$count / sum(ratings$count)
+  return(ratings)
+}
+#' rt <- GetRatingRatesForStory(189522647)
 
   #########################
   ###  Get Usage Array  ###

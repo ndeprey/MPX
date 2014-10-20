@@ -212,7 +212,12 @@ GetTlhByHourOfDay <- function(start.date, end.date, platforms=default.platforms,
 # tlh.by.hour <- GetTlhByHourOfDay(start.date='2014-01-01', end.date='2014-05-24')
 # plot(0:23, tlh.by.hour, type='l')
 
-GetUserDailyListening <- function(start.date, end.date, platforms=default.platforms, driver=m, group=mysql.group) {
+GetUserDailyListening <- function(start.date, 
+                                  end.date, 
+                                  cohort,
+                                  platforms=default.platforms, 
+                                  driver=m, 
+                                  group=mysql.group) {
   #' Returns, for the period specified, for each user-active-day, the number of minutes that
   #' user listened on that day.  The mean of this given mean user daily listening per active day.
   #' 
@@ -226,6 +231,7 @@ GetUserDailyListening <- function(start.date, end.date, platforms=default.platfo
                           "' AND ratings_platform IN ('", paste(platforms, collapse="', '"), "')",
                           " AND ratings_rating IN ('SKIP','COMPLETED') ",
                           " AND ratings_user_id NOT IN (", paste(robo.ids, collapse=", "), ")", 
+                          ifelse(missing(cohort), "", paste(" AND ratings_cohort = '", cohort, "'", sep="")),
                           " GROUP BY ratings_user_id, DATE(ratings_timestamp)",
                           sep=""))
   df <- fetch(rs, n=-1)
@@ -240,11 +246,25 @@ GetUserDailyListening <- function(start.date, end.date, platforms=default.platfo
 # MeanNonZeroValues(GetUserDailyListening(start.date="2014-06-01", end.date="2014-06-16", platforms='ANDROID'))
 
 GetStories <- function(start.date, end.date, platforms=default.platforms, driver=m, group=mysql.group) {
-  ur <- GetAllUserRatings(start.date=start.date, end.date=end.date,
-                          platforms=platforms, driver=driver, group=group)
-  return(unique(ur$ratings_story_id))
+  con <- dbConnect(driver, group = group)
+  SQLstatement <- paste("SELECT DISTINCT ratings_story_id FROM infinite.user_ratings ",
+                        "WHERE ratings_platform IN ('", 
+                        paste(platforms, collapse="', '"),
+                        "')", sep="")
+  if(!missing(start.date)) {
+    SQLstatement <- paste(SQLstatement, " AND ratings_timestamp >= '", start.date, "'", sep="")
+  }
+  if(!missing(end.date)) {
+    SQLstatement <- paste(SQLstatement, " AND ratings_timestamp < '", as.Date(end.date) + 1, "'", sep="")
+  }
+  SQLstatement <- paste(SQLstatement, " ORDER BY ratings_story_id")
+  rs <- dbSendQuery(con, SQLstatement)
+  df <- fetch(rs, n=-1)
+  dbDisconnect(con)
+  if(0 == nrow(df)) return (NULL)
+  else return(df[,1])
 }
-# story.ids <- GetStories("2014-10-01", "2014-10-10")
+# story.ids <- GetStories(start.date="2014-10-09", end.date="2014-10-10")
 
 GetRatingRatesForStory <- function(story.id, 
                                    platforms=default.platforms,

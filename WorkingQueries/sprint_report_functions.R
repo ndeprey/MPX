@@ -25,7 +25,7 @@ zip.db <- read.csv('~/Box Sync/work/NPR One metrics/zip_to_timezone/zipcode/zipc
 #' GetUserActiveDates: All dates that a user was active.
 #' GetUsers: Gets user information from public_user.mpx_beta_testers table.
 #' GetOrgs: Gets organization information from public_user.organization
-#' GetTLH: Total listening hours across all users for a date range.
+#' GetTLH: Total listening hours across all users for a date range, by cohort if specified.
 #' GetTlhByHourOfDay: Total listening hours for a date range broken out by hour of day.
 #' GetUserDailyListening: Returns vector containing daily listing times for each user 
 #'   for the date range. Users not identified.

@@ -29,6 +29,8 @@ zip.db <- read.csv('~/Box Sync/work/NPR One metrics/zip_to_timezone/zipcode/zipc
 #' GetTlhByHourOfDay: Total listening hours for a date range broken out by hour of day.
 #' GetUserDailyListening: Returns vector containing daily listing times for each user 
 #'   for the date range. Users not identified.
+#' GetUserTotalListening: Returns vector containing total listing times for each user 
+#'   for the date range. Users not identified.
 #' GetStories: Seamus ids for all stories rated during a date rrange.
 #' GetRatingRatesForStory: data.frame with the ratings for the story and the rate 
 #'   (fraction) for each of the ratings.
@@ -255,14 +257,14 @@ GetUserDailyListening <- function(start.date,
   #' user listened on that day.  The mean of this given mean user daily listening per active day.
   #' 
   #' Note that this is not the same as time using the app because we are
-  #' limiting these times to SKIP and COMPLETED ratings.
+  #' limiting these times to SKIP, COMPLETED, and SHARE ratings.
   con <- dbConnect(driver, group = group)
   rs <- dbSendQuery(con, 
                     paste("SELECT SUM(ratings_elapsed) / 60 as daily_total_minutes FROM infinite.user_ratings ",
                           "WHERE DATE(ratings_timestamp) >= '", start.date, 
                           "' AND DATE(ratings_timestamp) <= '", end.date,
                           "' AND ratings_platform IN ('", paste(platforms, collapse="', '"), "')",
-                          " AND ratings_rating IN ('SKIP','COMPLETED') ",
+                          " AND ratings_rating IN ('SKIP','COMPLETED', 'SHARE') ",
                           " AND ratings_user_id NOT IN (", paste(robo.ids, collapse=", "), ")", 
                           ifelse(missing(cohort), "", paste(" AND ratings_cohort IN ('",
                                                             paste(cohort, collapse="', '"), 
@@ -279,6 +281,38 @@ GetUserDailyListening <- function(start.date,
 # round(MeanNonZeroValues(GetUserDailyListening(start.date="2014-03-31", end.date="2014-04-13")), 1)
 # round(MeanNonZeroValues(udl <- GetUserDailyListening(start.date="2014-03-19", end.date="2014-04-18")), 1)
 # MeanNonZeroValues(GetUserDailyListening(start.date="2014-06-01", end.date="2014-06-16", platforms='ANDROID'))
+
+GetUserTotalListening <- function(start.date, 
+                                  end.date, 
+                                  cohort,
+                                  platforms=default.platforms, 
+                                  driver=m, 
+                                  group=mysql.group) {
+  #' Returns, for the period specified, for each user, the number of minutes that
+  #' user listened during the period.
+  #' 
+  #' Note that this is not the same as time using the app because we are
+  #' limiting these times to SKIP, COMPLETED, and SHARE ratings.
+  con <- dbConnect(driver, group = group)
+  rs <- dbSendQuery(con, 
+                    paste("SELECT SUM(ratings_elapsed) / 60 as total_minutes FROM infinite.user_ratings ",
+                          "WHERE DATE(ratings_timestamp) >= '", start.date, 
+                          "' AND DATE(ratings_timestamp) <= '", end.date,
+                          "' AND ratings_platform IN ('", paste(platforms, collapse="', '"), "')",
+                          " AND ratings_rating IN ('SKIP','COMPLETED', 'SHARE') ",
+                          " AND ratings_user_id NOT IN (", paste(robo.ids, collapse=", "), ")", 
+                          ifelse(missing(cohort), "", paste(" AND ratings_cohort IN ('",
+                                                            paste(cohort, collapse="', '"), 
+                                                            "')", sep="")),
+                          " GROUP BY ratings_user_id",
+                          sep=""))
+  df <- fetch(rs, n=-1)
+  dbDisconnect(con)
+  
+  total.minutes <- df[,"total_minutes"]
+  total.minutes <- total.minutes[!is.na(total.minutes)]
+  return(total.minutes)
+}
 
 GetStories <- function(start.date, 
                        end.date, 

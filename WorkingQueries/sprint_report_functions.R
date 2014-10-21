@@ -205,8 +205,9 @@ GetTLH <- function(start.date,
     "AND DATE(ratings_timestamp) >= '", start.date, "' ",
     "AND DATE(ratings_timestamp) <= '", end.date, "' ",
     "AND ratings_user_id NOT IN (", paste(robo.ids, collapse=", "), ")", sep='')
-  if(!missing(cohort)) SQLstatement <- paste(SQLstatement, " AND ratings_cohort='",
-                                             cohort, "'", sep="")
+  if(!missing(cohort)) SQLstatement <- paste(SQLstatement, " AND ratings_cohort IN ('",
+                                             paste(cohort, collapse="', '"), 
+                                             "')", sep="")
   rs <- dbSendQuery(con, SQLstatement)
   total.seconds <- as.vector(fetch(rs, n=-1)[1,1])
   dbDisconnect(con)
@@ -263,7 +264,9 @@ GetUserDailyListening <- function(start.date,
                           "' AND ratings_platform IN ('", paste(platforms, collapse="', '"), "')",
                           " AND ratings_rating IN ('SKIP','COMPLETED') ",
                           " AND ratings_user_id NOT IN (", paste(robo.ids, collapse=", "), ")", 
-                          ifelse(missing(cohort), "", paste(" AND ratings_cohort = '", cohort, "'", sep="")),
+                          ifelse(missing(cohort), "", paste(" AND ratings_cohort IN ('",
+                                                            paste(cohort, collapse="', '"), 
+                                                            "')", sep="")),
                           " GROUP BY ratings_user_id, DATE(ratings_timestamp)",
                           sep=""))
   df <- fetch(rs, n=-1)

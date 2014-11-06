@@ -32,7 +32,7 @@ BayesianDifferenceOfMedians <- function(x, y, minimum.meaningful.effect,
   posterior  <- MCMCquantreg(mcmc.y ~ mcmc.x, 
                              burnin=burnin, mcmc=n.draws,
                              b0=0, 
-                             B0 = matrix(c(1/sd(mcmc.y), 0, 0, 1/minimum.meaningful.effect^2), ncol=2))
+                             B0 = matrix(c(1/minimum.meaningful.effect^2, 0, 0, 1/sd(mcmc.y)), ncol=2))
   #' get draws for difference of medians
   draws <- posterior[,2]
   #' return probability median(x) > median(y) given the data

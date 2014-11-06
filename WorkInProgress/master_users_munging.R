@@ -1,15 +1,17 @@
 
 suppressPackageStartupMessages(library('ROCR'))
 
-u <- read.csv("master_users_v2_09_19.csv")
+u <- read.csv("all_users_9_26.csv")
 
 u$FirstDayActive <- as.Date(strptime(u$FirstDayActive, "%Y-%m-%d"))
 u$LastDayActive <- as.Date(strptime(u$LastDayActive, "%Y-%m-%d"))
 
+u$range_active <- 1 + as.numeric(u$LastDayActive - u$FirstDayActive)
+u$pct_days_active <- u$activeDays / (1 + as.numeric(u$LastDayActive - u$FirstDayActive))
+
 internal <- u[u$FirstDayActive < "2014-07-28",]
 u <- u[u$FirstDayActive >= "2014-07-28",]
 
-u$PodcastSkips <- u$Rated
 u$TotalSeconds <- as.numeric(u$TotalSeconds)
 
 u$TLM.per.day <- u$TotalSeconds / u$activeDays / 60
@@ -45,6 +47,8 @@ u$used_Android <- u$ANDROIDratings >= 1
 u$used_webapp <- u$WEBAPPratings >= 1
 
 
+
+
 u$lapsed_08_24 <- u$LastDayActive <= "2014-08-24"
 u$lapsed_08_31 <- u$LastDayActive <= "2014-08-31"
 u$lapsed_09_07 <- u$LastDayActive <= "2014-09-07"
@@ -56,9 +60,8 @@ u$lapsed_09_07 <- u$LastDayActive <= "2014-09-07"
 #           + Break_skip_rate + Rated_skip_rate + Podcast_skip_rate)
 
 lapse <- function(df, lapse_date){
-  ## lapsed_08_31 <- lapse(u, "2014-08-31")
-  ## returns a list of glm objects and accuracy calculations
-  
+
+  # lapse_var <- paste("df$","lapse_date",sep="")
   df$lapse <- df$LastDayActive <= lapse_date
   df <- df[df$FirstDayActive <= lapse_date,]
   
@@ -84,15 +87,8 @@ lapse <- function(df, lapse_date){
   optimal.cutoff <- accs$cutoff[accs$accuracy == max(accs$accuracy)][1]
   best.accuracy <- max(accs$accuracy)
 
-  return.objects <- list("model" = model, "acc"=acc, "pred" = pred, "prec" = prec, "rec" = rec, 
-                         "optimal.cutoff"=optimal.cutoff, "best.accuracy" = best.accuracy,
-                         "df" = df)
+  return.objects <- list("acc"=acc, "pred" = pred, "prec" = prec, "rec" = rec, "optimal.cutoff"=optimal.cutoff, "best.accuracy" = best.accuracy)
   
   return(return.objects)
   
 }
-
-lapse_09_01 <- lapse(u, "2014-09-01")
-print(paste("this model predicted attrition with ",lapse_09_01$best.accuracy," accuracy at a cutoff of ",lapse_08_27$optimal.cutoff,sep=""))
-summary(lapse_09_01$model)
-

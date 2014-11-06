@@ -162,7 +162,7 @@ Ratings_To_Sessions <- function(df) {
   session.cohort <- c()
   local.newscast <- c()
   local.story <- c()
-  rated.podcasts <- numeric
+  rated.podcasts <- numeric()
   
   for(i in 1:max(df$session_id)){
     setTxtProgressBar(pb, i)
@@ -180,7 +180,8 @@ Ratings_To_Sessions <- function(df) {
   
   sessionsdf <- data.frame(session.id = session.id, ratings_user_id = ratings_user_id, session.cohort = session.cohort,
                            length.seconds = length.seconds, start_time = start_time, 
-                           story_count = story_count, local.newscast=local.newscast, local.story=local.story)
+                           story_count = story_count, local.newscast=local.newscast, local.story=local.story,
+                           rated.podcasts= rated.podcasts)
   close(pb)
   
   print("done assigning core session metadata")

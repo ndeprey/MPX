@@ -56,7 +56,7 @@ Get_ratings_story_info <- function(start.date, end.date, origins, session_timeou
   return(df)
 }
 
-start.date <- Sys.Date() - 21
+start.date <- Sys.Date() - 48
 end.date <- Sys.Date() - 1
 print(paste("for start date of",start.date,"and end date of",end.date))
 

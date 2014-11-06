@@ -32,6 +32,7 @@ Get_origin_content <- function(start.date, end.date, origin, platforms=default.p
   print(paste("the query has", nrow(df), "ratings for the origin",origin))
   
   content <- dcast(df,ratings_media_id ~ ratings_rating, fun.aggregate=length)
+  print(paste("the origin ",origin," has ", nrow(content)," unique stories in this period",sep=""))
   
   for(i in 1:nrow(content)){
     content$instant_skips[i] <- length(df$ratings_rating[
@@ -47,9 +48,11 @@ Get_origin_content <- function(start.date, end.date, origin, platforms=default.p
     content$completion_rate[i] <- content$COMPLETED[i] / content$TOTAL[i]
     content$share_rate[i] <- content$SHARE[i] / content$TOTAL[i]
     content$thumbup_rate[i] <- content$THUMBUP[i] / content$TOTAL[i]
+    content$thumbup_share_rate[i] <- content$thumbup_rate[i] + content$share_rate[i]
   }
-  
-  return(content)
+  p <- ggplot(content[content$TOTAL>200,], aes(x=skip_rate, y=thumbup_share_rate)) + geom_point(shape=1)
+  obj <- list(content,p))
+  return(obj)
   
 }
 

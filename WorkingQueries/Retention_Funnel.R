@@ -4,7 +4,7 @@ library(lubridate)
 library(RMySQL)
 library(plyr)
 library(reshape2)
-library(ggplot2)
+
 
 m <- dbDriver("MySQL")
 
@@ -159,8 +159,8 @@ Get_Retention_Funnel <- function(){
 
 summary <- Get_Retention_Funnel()
 
-write.csv(summary,file="retention_funnel_current.csv")
-write.csv(summary,file=paste("retention_funnel_",Sys.Date()-1,".csv",sep=''))
+try(write.csv(summary,file="/home/developer/MPX/retention_funnels/retention_funnel_current.csv"))
+try(write.csv(summary,file=paste("/home/developer/MPX/retention_funnels/retention_funnel_",Sys.Date()-1,".csv",sep='')))
 
 print("done producing funnel and writing to csv")
 print(summary)

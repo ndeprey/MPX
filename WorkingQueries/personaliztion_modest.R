@@ -8,7 +8,7 @@ GetSkippingUsers <- function(start.date, end.date, driver=m) {
   #' with records in that date range.
 }
 
-GetPersonalizationRecords <- function(start.date, end.date, driver=m) {
+GetPersonalizationRecords <- function(start.date, end.date, driver=m, group=mysql.group) {
   #' Given dates returns records in infinite.user_skip_personalization
   #' during that period. Generally used as a helper function.
   #' 
@@ -17,10 +17,22 @@ GetPersonalizationRecords <- function(start.date, end.date, driver=m) {
   #'   0: no/some skips
   #'   1: hiatus
   #'   2: recovery
-  con <- dbConnect(driver, group = "stage4")
-  SQLstatement <- paste("SELECT * FROM infinite.user_skip_personalization ",
-                        "WHERE DATE(sper_timestamp) >= '", start.date, "' ",
-                        "AND DATE(sper_timestamp) <= '", end.date, "'", sep="")
+  con <- dbConnect(driver, group=group)
+  SQLstatement <- "SELECT * FROM infinite.user_skip_personalization"
+  if(!missing(start.date)) {
+    if(!missing(end.date)) {
+      SQLstatement <- paste(SQLstatement, " WHERE DATE(sper_timestamp) >= '", start.date,
+                            "' AND DATE(sper_timestamp) <= '", end.date, "'", sep="")
+    } else {
+      SQLstatement <- paste(SQLstatement, " WHERE DATE(sper_timestamp) >= '", start.date, 
+                            "'", sep="")
+    }
+  } else {
+    if(!missing(end.date)) {
+      SQLstatement <- paste(SQLstatement, " WHERE DATE(sper_timestamp) <= '", end.date, 
+                            "'", sep="")  
+    }
+  }
   rs <- dbSendQuery(con, SQLstatement)
   records <- fetch(rs, n=-1)
   dbDisconnect(con)
@@ -32,12 +44,14 @@ GetPersonalizationRecords <- function(start.date, end.date, driver=m) {
   }
 }
 #' pers.rec <- GetPersonalizationRecords("2014-09-25", "2014-09-30")
+#' pers.rec <- GetPersonalizationRecords()
 
-CurrentPersonalization <- function(start.date, 
-                                   end.date, 
-                                   start.search=as.Date(start.date) - 30, 
-                                   verbose=FALSE,
-                                   driver=m) {
+PersonalizationDuringPeriod <- function(start.date, 
+                                        end.date, 
+                                        start.search=as.Date(start.date) - 30, 
+                                        verbose=FALSE,
+                                        driver=m,
+                                        group=mysql.group) {
   #' Gets all users with any hiatus during the period specified.
   #' To do this, it determines all users with hiatus initiation
   #' on or after after start.search and on or prior to end.date 
@@ -45,9 +59,24 @@ CurrentPersonalization <- function(start.date,
   #' with vector of unique users having any hiatus and a data.frame 
   #' with user.ids and ORIGINs on hiatus at any point during the 
   #' period.
-  pers.rec <- GetPersonalizationRecords(start.date=start.date,
-                                        end.date=end.date,
-                                        driver=driver)
+  if(!missing(start.date)) {
+    if(!missing(end.date)) {
+      pr <- GetPersonalizationRecords(start.date=start.search,
+                                      end.date=end.date,
+                                      driver=driver,
+                                      group=group)  
+    } else {
+      pr <- GetPersonalizationRecords(start.date=start.search,
+                                      driver=driver,
+                                      group=group)  
+    }
+  } else {
+    if(!missing(end.date)) {
+      pr <- GetPersonalizationRecords(end.date=end.date,
+                                      driver=driver,
+                                      group=group)  
+    }
+  }
   pr <- pr[order(pr$sper_timestamp),]
   
   #' initialize output
@@ -85,4 +114,83 @@ CurrentPersonalization <- function(start.date,
   return( list(user.ids=unique(user.origins.on.hiatus$user.id),
                users.and.origins=user.origins.on.hiatus) )
 }
-#' cp <- CurrentPersonalization(start.date="2014-10-01", end.date="2014-10-01", verbose=TRUE)
+#' pdp <- PersonalizationDuringPeriod(start.date="2014-10-01", end.date="2014-10-01", verbose=TRUE)
+
+CurrentPersonalization <- function(earliest.date=Sys.Date() - 30,
+                                   include.in.recovery=TRUE,
+                                   verbose=FALSE,
+                                   driver=m, 
+                                   group=mysql.group) {
+  
+  if(include.in.recovery == TRUE) {
+    status.codes <- 1:2
+  } else {
+    status.codes <- 1
+  }
+  
+  pr <- GetPersonalizationRecords(start.date=earliest.date,
+                                  driver=driver,
+                                  group=group)  
+  #' sort the personalization records
+  pr <- pr[order(pr$sper_timestamp),]
+  #' get the list of users with records
+  uids <- unique(pr$sper_user_id)
+  #' prepare the output
+  out <- data.frame(user.id=numeric(0), origin=character(0))
+  # cycle through the user ids
+  if(verbose) pb <- txtProgressBar(max=length(uids))
+  for(i in 1:length(uids)) {
+    if(verbose) setTxtProgressBar(pb, i)
+    uid <- uids[i]
+    user.pr <- pr[pr$sper_user_id == uid,]
+    for(origin in unique(user.pr$sper_origin)) {
+      user.origin.pr <- user.pr[user.pr$sper_origin == origin,]
+      hiatus <- FALSE
+      if(nrow(user.origin.pr) > 0 && 
+           user.origin.pr$sper_to_period[nrow(user.origin.pr)] %in% status.codes) {
+        #' on hiatus or in recovery if included
+        out <- rbind(out,
+                     data.frame(user.id=uid, origin=origin))
+        
+      }
+    }
+  }
+  if(verbose) close(pb)
+  return(list(spec=ifelse(include.in.recovery, "Includes users on hiatus or in recovery",
+                          "Includes only users on hiatus"),
+              current.hiatus=out))
+}
+#' cp <- CurrentPersonalization()
+
+GetUserStation <- function(user.ids, driver=m, group=mysql.group) {
+  #' Given a vector of user.ids return a data from with information about the
+  #' station each is localized to.
+  
+  con <- dbConnect(driver, group=group)
+  
+  #' Get org ids for each
+  org.ids <- sapply(user.ids, function(uid) {
+    SQLstatement <- paste("SELECT * FROM public_user.public_user_stations WHERE stations_preference_order = 0 AND stations_public_user_id = '", uid, "'", sep="")
+    rs <- dbSendQuery(con, SQLstatement)
+    records <- fetch(rs, n=-1)
+    if(0 == nrow(records)) {
+      return(NA_integer_)
+    } else {
+      return(records[1,"stations_org_id"])
+    }
+  })
+  out <- data.frame(user.id=user.ids, org.id=org.ids)
+  
+  SQLstatement <- "SELECT * FROM public_user.organization"
+  rs <- dbSendQuery(con, SQLstatement)
+  org.data <- fetch(rs, n=-1)
+  
+  out <- merge(x=out, y=org.data, by.x="org.id", by.y="org_id", all.x=TRUE)
+  
+  dbDisconnect(con)
+  
+  return(out)
+}
+#' cp <- CurrentPersonalization()
+#' cp.org <- GetUserStation(cp$current.hiatus$user.id)
+#' table(cp.org$org_abbr)

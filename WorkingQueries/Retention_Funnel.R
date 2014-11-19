@@ -166,7 +166,7 @@ last3 <- Get_Retention_Funnel(Sys.Date()-21,Sys.Date()-1)
 
 try(write.csv(alltime,file="/home/developer/retention_funnels/retention_funnel_current.csv"))
 try(write.csv(alltime,file=paste("/home/developer/retention_funnels/retention_funnel_",Sys.Date()-1,".csv",sep='')))
-try(write.csv(alltime,file="/home/developer/retention_funnels/retention_funnel_last3.csv"))
+try(write.csv(last3,file="/home/developer/retention_funnels/retention_funnel_last3.csv"))
 
 print("done producing funnel and writing to csv")
 print(summary)

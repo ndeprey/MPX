@@ -13,11 +13,11 @@ m <- dbDriver("MySQL")
 ## for (con in cons){
 ## dbDisconnect(con) }
 
-Get_Retention_Funnel <- function(){
+Get_Retention_Funnel <- function(start.date, end.date){
 
   ### Create a list of start and end dates for week calculations used in MySQL call ###
-  start.dates <- seq.Date(as.Date("2014-07-27"),Sys.Date(),by="week")
-  end.dates <- seq.Date(as.Date("2014-08-02"),start.dates[length(start.dates)]+7,by="week")
+  start.dates <- seq.Date(as.Date(start.date),as.Date(end.date),by="week")
+  end.dates <- seq.Date(as.Date(start.date)+6,start.dates[length(start.dates)]+6,by="week")
   Weeks <- c()
   for(i in 1:length(start.dates)){
     Weeks[i] <- as.character(paste("Week",i,sep=""))
@@ -96,6 +96,10 @@ Get_Retention_Funnel <- function(){
   # remove old beta users and testers prior to launch #
   u <- u[u$last_listen_date >= "2014-07-28",]
   
+  print("subsetting by create_date...")
+  #filter on only the users who created during the study period
+  u <- u[(u$create_date >= as.Date(start.date)) & (u$create_date <= as.Date(end.date)),]
+  
   print("calculating key metrics...")
   # calculate key metrics #
   u$tlm <- as.numeric(as.character(u$lifetime_listening_minutes))
@@ -157,10 +161,12 @@ Get_Retention_Funnel <- function(){
   return(alltime_funnel)
 }
 
-summary <- Get_Retention_Funnel()
+alltime <- Get_Retention_Funnel("2014-07-28",Sys.Date()-1)
+last3 <- Get_Retention_Funnel(Sys.Date()-21,Sys.Date()-1)
 
-try(write.csv(summary,file="/home/developer/retention_funnels/retention_funnel_current.csv"))
-try(write.csv(summary,file=paste("/home/developer/retention_funnels/retention_funnel_",Sys.Date()-1,".csv",sep='')))
+try(write.csv(alltime,file="/home/developer/retention_funnels/retention_funnel_current.csv"))
+try(write.csv(alltime,file=paste("/home/developer/retention_funnels/retention_funnel_",Sys.Date()-1,".csv",sep='')))
+try(write.csv(alltime,file="/home/developer/retention_funnels/retention_funnel_last3.csv"))
 
 print("done producing funnel and writing to csv")
 print(summary)

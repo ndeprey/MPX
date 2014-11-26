@@ -38,36 +38,50 @@ payload_alltime = {'start_date':alltime_start, 'end_date':yesterday}
 payload_last3 = {'start_date':last_3_start, 'end_date':yesterday}
 
 
-# In[136]:
+# Send the call for ios
 
 alltime_response_ios = requests.get(ios_url,headers=headers,params=payload_alltime)
+<<<<<<< HEAD
 print alltime_response_ios.status_code
 last_3_response_ios = requests.get(ios_url,headers=headers,params=payload_last3).json()
+=======
+last_3_response_ios = requests.get(ios_url,headers=headers,params=payload_last3)
+
+print alltime_response_ios.status_code
+print last_3_response_ios.status_code
+
+alltime_response_ios = alltime_response_ios.json()
+last_3_response_ios = last_3_response_ios.json()
+
+# Save the raw download totals from the response object
+>>>>>>> e1ff1a92bec91ec9a8a3eb693c2e6bdfd8bb2da9
 alltime_downloads_ios = alltime_response_ios['sales_list'][0]['units']['product']['downloads']
 last_3weeks_downloads_ios = last_3_response_ios['sales_list'][0]['units']['product']['downloads']
 
 
-# In[137]:
+# Send the same call for google play
+alltime_response_gplay = requests.get(google_url,headers=headers,params=payload_alltime)
+last_3_response_gplay = requests.get(google_url,headers=headers,params=payload_last3)
 
-alltime_response_gplay = requests.get(google_url,headers=headers,params=payload_alltime).json()
-last_3_response_gplay = requests.get(google_url,headers=headers,params=payload_last3).json()
+print alltime_response_gplay.status_code
+print last_3_response_gplay.status_code
 
+alltime_response_gplay = alltime_response_gplay.json()
+last_3_response_gplay = last_3_response_gplay.json()
 
-# In[138]:
-
+# Save the download totals for gplay
 alltime_downloads_gplay = alltime_response_gplay['sales_list'][0]['units']['product']['downloads']
 last_3weeks_downloads_gplay = last_3_response_gplay['sales_list'][0]['units']['product']['downloads']
 
 
-# In[139]:
-
+# create a dict from the download totals
 summary = {'ios_alltime': alltime_downloads_ios,
                'ios_last3': last_3weeks_downloads_ios,
                'android_alltime': alltime_downloads_gplay,
                'android_last3': last_3weeks_downloads_gplay}
 
 
-# In[141]:
+# change directory, save the csv
 try:
 	os.chdir('/home/developer/retention_funnels')
 except:
@@ -77,8 +91,8 @@ writer = csv.writer(open('app_annie_downloads_current.csv', 'wb'))
 for key, value in summary.items():
 		writer.writerow([key, value])
 
+print 'done writing to csv'
 
-# In[ ]:
-
+print summary
 
 

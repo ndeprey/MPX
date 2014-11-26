@@ -14,7 +14,7 @@ m <- dbDriver("MySQL")
 ## for (con in cons){
 ## dbDisconnect(con) }
 
-SkipRates_by_origin <- function(start.date, end.date, platforms=default.platforms, driver=m, group="stage4") {
+SkipRates_by_origin_hour <- function(start.date, end.date, start.hour,end.hour,weekdays=c(0,1,2,3,4,5,6),platforms=default.platforms, driver=m, group="stage4") {
   # start.date <- '2014-07-12'
   # end.date <- '2014-07-14'
   
@@ -26,6 +26,9 @@ SkipRates_by_origin <- function(start.date, end.date, platforms=default.platform
                         "AND ratings_origin NOT IN ('INTRO','ASSIST','NONFICTION','HELLO','STID','SEARCH','XAPPAD','XAPPPROMO','SPONS','DONATE','EDTR','SHARED') ",
                         "AND DATE(ratings_timestamp) >= '", start.date, "' ",
                         "AND DATE(ratings_timestamp) <= '", end.date, "' ",
+                        "AND HOUR(ratings_timestamp) >= '", start.hour, "' ",
+                        "AND HOUR(ratings_timestamp) <= '", end.hour, "' ",
+                        "AND weekday(ratings_timestamp) IN ('", paste(weekdays, collapse="', '"), "') ",
                         "ORDER BY ratings_user_id ASC, TIMESTAMP(ratings_timestamp) ASC", sep='')
   rs <- dbSendQuery(con, SQLstatement)
   df <- fetch(rs, n=-1)

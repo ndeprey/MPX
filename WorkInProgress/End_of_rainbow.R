@@ -86,4 +86,4 @@ End_of_rainbow <- function(start.date, end.date, session_timeout=30, platforms=d
   return(rainbow_users)
 }
 
-rainbow_users <- End_of_rainbow(start.date,end.date)
+# rainbow_users <- End_of_rainbow(start.date,end.date)

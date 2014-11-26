@@ -40,7 +40,8 @@ payload_last3 = {'start_date':last_3_start, 'end_date':yesterday}
 
 # In[136]:
 
-alltime_response_ios = requests.get(ios_url,headers=headers,params=payload_alltime).json()
+alltime_response_ios = requests.get(ios_url,headers=headers,params=payload_alltime)
+print alltime_response_ios.status_code
 last_3_response_ios = requests.get(ios_url,headers=headers,params=payload_last3).json()
 alltime_downloads_ios = alltime_response_ios['sales_list'][0]['units']['product']['downloads']
 last_3weeks_downloads_ios = last_3_response_ios['sales_list'][0]['units']['product']['downloads']

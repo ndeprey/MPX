@@ -120,18 +120,20 @@ Get_content <- function(start.date, end.date, platforms=default.platforms, drive
 }
 
 yesterday <- Get_content(Sys.Date()-1,Sys.Date()-1)
-write.csv(yesterday, file = "/Users/ndeprey/Documents/trial_content.csv")
-# write.csv(yesterday, file=paste("/home/developer/content_reports/npr_one_content_yesterday",Sys.Date()-1,".csv",sep=''))
-# write.csv(yesterday, file="/home/developer/content_reports/npr_one_content_yesterday_current.csv")
-# 
-# last7 <- Get_content(Sys.Date()-7,Sys.Date()-1)
-# write.csv(last7, file=paste("/home/developer/content_reports/npr_one_content_last_7_days_",Sys.Date()-1,".csv",sep=''))
-# write.csv(last7, file="/home/developer/content_reports/npr_one_content_last_7_days_current.csv")
-# 
-# last_30 <- Get_content(Sys.Date()-30,Sys.Date()-1)
-# write.csv(last7, file=paste("/home/developer/content_reports/npr_one_content_last_30_days_",Sys.Date()-1,".csv",sep=''))
-# write.csv(last7, file="/home/developer/content_reports/npr_one_content_last_30_days_current.csv")
-# 
+
+# write.csv(yesterday, file = "/Users/ndeprey/Documents/trial_content.csv")
+
+try(write.csv(yesterday, file=paste("/home/developer/content_reports/npr_one_content_yesterday",Sys.Date()-1,".csv",sep='')))
+try(write.csv(yesterday, file="/home/developer/content_reports/npr_one_content_yesterday_current.csv"))
+
+last7 <- Get_content(Sys.Date()-7,Sys.Date()-1)
+try(write.csv(last7, file=paste("/home/developer/content_reports/npr_one_content_last_7_days_",Sys.Date()-1,".csv",sep='')))
+try(write.csv(last7, file="/home/developer/content_reports/npr_one_content_last_7_days_current.csv"))
+
+last_30 <- Get_content(Sys.Date()-30,Sys.Date()-1)
+try(write.csv(last7, file=paste("/home/developer/content_reports/npr_one_content_last_30_days_",Sys.Date()-1,".csv",sep='')))
+try(write.csv(last7, file="/home/developer/content_reports/npr_one_content_last_30_days_current.csv"))
+
 
 
 

@@ -130,9 +130,9 @@ last7 <- Get_content(Sys.Date()-7,Sys.Date()-1)
 try(write.csv(last7, file=paste("/home/developer/content_reports/npr_one_content_last_7_days_",Sys.Date()-1,".csv",sep='')))
 try(write.csv(last7, file="/home/developer/content_reports/npr_one_content_last_7_days_current.csv"))
 
-last_30 <- Get_content(Sys.Date()-30,Sys.Date()-1)
-try(write.csv(last7, file=paste("/home/developer/content_reports/npr_one_content_last_30_days_",Sys.Date()-1,".csv",sep='')))
-try(write.csv(last7, file="/home/developer/content_reports/npr_one_content_last_30_days_current.csv"))
+# last_30 <- Get_content(Sys.Date()-30,Sys.Date()-1)
+# try(write.csv(last7, file=paste("/home/developer/content_reports/npr_one_content_last_30_days_",Sys.Date()-1,".csv",sep='')))
+# try(write.csv(last7, file="/home/developer/content_reports/npr_one_content_last_30_days_current.csv"))
 
 
 

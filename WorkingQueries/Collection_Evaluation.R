@@ -68,7 +68,7 @@ shows_df <- Collection_evaluation(start.date = args$start.date,
                                   origin = args$origin)
 
 
-filepath <- paste("/Users/developer/podcast_reports/collection_report_",args$start.date,"_",args$origin,sep="")
+filepath <- paste("/home/developer/podcast_reports/collection_report_",args$start.date,"_",args$origin,sep="")
 write.csv(shows_df,filepath)
 
 print(shows_df)

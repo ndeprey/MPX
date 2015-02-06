@@ -47,13 +47,19 @@ Collection_evaluation <- function(start.date, end.date, origin, platforms=defaul
   return(shows)
 }
 
-start.date = readline("What is the start date?  e.g. '2015-01-26' ")
-end.date = readline("What is the (inclusive) end date? e.g. '2015-01-28' ")
-origin = readline("What is the origin name? e.g. 'RATED' ")
+prompt_args <- function(){
+  start.date <- readline("What is the start date?  e.g. '2015-01-26' ")
+  end.date <- readline("What is the (inclusive) end date? e.g. '2015-01-28' ")
+  origin <- readline("What is the origin name? e.g. 'RATED' ")
 
-shows_df = Collection_evaluation(start.date=start.date,
-                                 end.date=end.date,
-                                 origin=origin)
+}
+  
+promt_args()
+
+shows_df <- Collection_evaluation(start.date=start.date,
+                                  end.date=end.date,
+                                  origin=origin)
+
 
 # write.csv(shows,"/Users/developer/Documents")
 

@@ -3,6 +3,7 @@ library(lubridate)
 library(RMySQL)
 library(plyr)
 library(reshape2)
+
 m <- dbDriver("MySQL")
 default.platforms <- c('IPHONE', 'ANDROID')
 
@@ -67,6 +68,7 @@ shows_df <- Collection_evaluation(start.date = args$start.date,
                                   origin = args$origin)
 
 
-write.csv(shows,"/Users/developer/podcast_reports")
+filepath <- paste("/Users/developer/podcast_reports/collection_report_",args$start.date,"_",args$origin,sep="")
+write.csv(showsdf,"/Users/developer/podcast_reports/collection_report_",)
 
 print(shows_df)

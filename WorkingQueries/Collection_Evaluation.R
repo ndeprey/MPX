@@ -54,7 +54,7 @@ prompt_args <- function(){
 
 }
   
-promt_args()
+prompt_args()
 
 shows_df <- Collection_evaluation(start.date=start.date,
                                   end.date=end.date,

@@ -26,6 +26,7 @@ SkipRates_by_origin <- function(start.date, end.date, platforms=default.platform
                         "AND ratings_origin NOT IN ('INTRO','ASSIST','NONFICTION','HELLO','STID','SEARCH','XAPPAD','XAPPPROMO','SPONS','DONATE','EDTR','SHARED') ",
                         "AND DATE(ratings_timestamp) >= '", start.date, "' ",
                         "AND DATE(ratings_timestamp) <= '", end.date, "' ",
+                        "AND ratings_user_id < 1000000000 ",
                         "ORDER BY ratings_user_id ASC, TIMESTAMP(ratings_timestamp) ASC", sep='')
   rs <- dbSendQuery(con, SQLstatement)
   df <- fetch(rs, n=-1)

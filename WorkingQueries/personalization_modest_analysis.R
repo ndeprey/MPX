@@ -1,6 +1,6 @@
 #' Analyze hiatus personalization
 
-source('~/github/MPX/WorkingQueries/personalization_modest.R')
+source('~/github/MPX/WorkingQueries/personaliztion_modest.R')
 
 #' Get numbers for those on hiatus
 cp <- CurrentPersonalization()

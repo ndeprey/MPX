@@ -8,7 +8,7 @@ library(plyr)
 m <- dbDriver("MySQL")
 mysql.group <- "stage4-infinite"
 # default.platforms <- c('IPHONE')
-default.platforms <- c('IPHONE', 'ANDROID')
+default.platforms <- c('IPHONE', 'ANDROID', 'WINDOWPH')
 robo.ids <- c(11987982,
   13174734, 1186881532, 1087617437, 1138038188, 9906791, 7456245, 8943206, 
   12526723, 2019184, 100042, 11727645, 10853163, 11657281, 11420786)

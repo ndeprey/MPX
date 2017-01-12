@@ -1,7 +1,7 @@
 #' Frequentist difference of medians using bootstrapping
 
 DifferenceOfMedians <- function(x, y, frac.dropped=.2, n.iter=1000, silent=FALSE) {
-  #' Given two vectors return the distribution of difference of means
+  #' Given two vectors return the distribution of difference of medians
   #' calculated using bootstrapping
   
   OneDraw <- function() {
